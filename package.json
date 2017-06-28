@@ -1,0 +1,30 @@
+{
+  "name": "meuevento",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "author": "Fabio Lopes",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.16.1",
+    "cookie-parser": "^1.4.3",
+    "express": "^4.14.1",
+    "express-session": "^1.15.1",
+    "gulp": "^3.9.1",
+    "gulp-nodemon": "^2.2.1",
+    "md5": "^2.2.1",
+    "moment": "^2.17.1",
+    "mongoose": "^4.8.2",
+    "promise": "^7.1.1",
+    "q": "^1.5.0",
+    "qrcode": "^0.5.0",
+    "qrcode-npm": "0.0.3"
+  },
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-install": "^0.6.0",
+    "gulp-jscs": "^4.0.0",
+    "gulp-jshint": "^2.0.4",
+    "jshint-stylish": "^2.2.1"
+  }
+}

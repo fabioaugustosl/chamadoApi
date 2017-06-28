@@ -332,13 +332,15 @@ var chamadoController = function(chamadoModel, grupoModel){
 			queryFinal = { $and: query };
 		}
 
-		chamadoModel.find(queryFinal, function(err, chamados){
-			if(err){
-				res.status(500).send(err);
-			} else {
-				res.json(chamados);
-			}
-		});
+		chamadoModel.find(queryFinal)
+			.populate('itens')
+			.exec(function(err, chamados){
+				if(err){
+					res.status(500).send(err);
+				} else {
+					res.json(chamados);
+				}
+			});
 	};
 
 

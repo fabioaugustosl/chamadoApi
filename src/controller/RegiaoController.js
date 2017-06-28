@@ -146,7 +146,10 @@ var regiaoController = function(regiaoModel, unidadeModel){
 
 
 	var listar = function(req, res){
-		regiaoModel.find(req.query, function(err, regioes){
+		regiaoModel.find(req.query)
+			.populate('unidades')
+			.populate('apoios')
+			.exec(function(err, regioes){
 			if(err){
 				res.status(500).send(err);
 			} else {

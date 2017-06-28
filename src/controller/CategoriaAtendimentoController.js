@@ -142,13 +142,15 @@ var categoriaController = function(categoriaModel,itemAtendimentoModel){
 	var listar = function(req, res){
 		console.log(' ::: Listar categoria');
 		
-		categoriaModel.find(req.query, function(err, categorias){
-			if(err){
-				res.status(500).send(err);
-			} else {
-				res.json(categorias);
-			}
-		});
+		categoriaModel.find(req.query)
+			.populate('itens')
+			.exec(function(err, categorias){
+				if(err){
+					res.status(500).send(err);
+				} else {
+					res.json(categorias);
+				}
+			});
 	};
 
 

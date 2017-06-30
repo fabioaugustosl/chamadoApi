@@ -2,6 +2,7 @@ var express = require('express');
 
 var chamadoRouter = express.Router();
 
+var classificadorStatus = require('../util/ClassificadorStatusChamado');
 var chamadoModel = require('../models/ChamadoModel');
 var regiaoModel = require('../models/RegiaoModel');
 var chamadoController = require('../controller/ChamadoController')(chamadoModel,regiaoModel);
@@ -24,7 +25,12 @@ chamadoRouter.use('/:chamadoId', function(req, res, next){
 		if(err){
 			res.status(500).send(err);
 		} else if(chamado) {
+			console.log('find by id route');
 			req.chamado = chamado;
+			
+			console.log(req.chamado.status);
+
+			
 			next();
 		} else {
 			res.status(404).send('Chamado não encontrado');
@@ -35,6 +41,8 @@ chamadoRouter.use('/:chamadoId', function(req, res, next){
 
 chamadoRouter.route('/:chamadoId')
 		.get(function(req, res){
+			req.chamado.status = classificadorStatus(req.chamado);
+			console.log(req.chamado);
 			res.json(req.chamado);
 		})
 		.patch(function(req, res){

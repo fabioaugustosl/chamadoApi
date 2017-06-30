@@ -25,7 +25,8 @@ var chamadoModel = new Schema({
 	dataApoio:{ type: Date},
 	dataInicioAtendimento:{ type: Date},
 	dataFim:{ type: Date},
-	deletado:{type:Boolean, default: false}
+	deletado:{type:Boolean, default: false},
+	status:{type:String}
 });
 
 module.exports = mongoose.model('Chamado', chamadoModel);

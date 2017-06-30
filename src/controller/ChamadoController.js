@@ -2,6 +2,7 @@
 var moment = require('moment');
 var Promise = require('promise');
 var q = require('q');
+var classificadorStatus = require('../util/ClassificadorStatusChamado');
 
 var chamadoController = function(chamadoModel, grupoModel){
 
@@ -335,10 +336,20 @@ var chamadoController = function(chamadoModel, grupoModel){
 		chamadoModel.find(queryFinal)
 			.populate('itens')
 			.exec(function(err, chamados){
+
 				if(err){
 					res.status(500).send(err);
 				} else {
-					res.json(chamados);
+					
+					var returnChamados = [];
+					chamados.forEach(function(element, index, array){
+						var chamadoObj = element.toJSON();
+						chamadoObj.status = classificadorStatus(chamadoObj);
+						returnChamados.push(chamadoObj);
+					});
+
+					//console.log(returnEventos);
+					res.json(returnChamados);
 				}
 			});
 	};
@@ -372,7 +383,15 @@ var chamadoController = function(chamadoModel, grupoModel){
 			if(err){
 				res.status(500).send(err);
 			} else {
-				res.json(chamados);
+				var returnChamados = [];
+				chamados.forEach(function(element, index, array){
+					var chamadoObj = element.toJSON();
+					chamadoObj.status = classificadorStatus(chamadoObj);
+					returnChamados.push(chamadoObj);
+				});
+
+				//console.log(returnEventos);
+				res.json(returnChamados);
 			}
 		});
 	};

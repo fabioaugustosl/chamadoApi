@@ -19,16 +19,19 @@ categoriaRouter.use('/:categoriaId', function(req, res, next){
 	console.log('chegou no middleware categoria route');
 	
 	// esse é nosso middleware
-	CategoriaAtendimentoModel.findById(req.params.categoriaId, function(err, categoria){
-		if(err){
-			res.status(500).send(err);
-		} else if(categoria) {
-			req.categoria = categoria;
-			next();
-		} else {
-			res.status(404).send('Categoria não encontrada');
-		}
-	});
+	CategoriaAtendimentoModel.findById(req.params.categoriaId)
+		.populate('itens')
+		.populate('empresas')
+		.exec( function(err, categoria){
+			if(err){
+				res.status(500).send(err);
+			} else if(categoria) {
+				req.categoria = categoria;
+				next();
+			} else {
+				res.status(404).send('Categoria não encontrada');
+			}
+		});
 });
 
 

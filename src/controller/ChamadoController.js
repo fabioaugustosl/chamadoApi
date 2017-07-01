@@ -4,6 +4,10 @@ var Promise = require('promise');
 var q = require('q');
 var classificadorStatus = require('../util/ClassificadorStatusChamado');
 
+/*Controller para gerar as notificações a medida que as acoes no chamado forem ocorrendo*/
+var NotificacaoModel = require('../models/NotificacaoModel');
+var NotificacaoController = require('../controller/NotificacaoController')(NotificacaoModel);
+
 var chamadoController = function(chamadoModel, grupoModel){
 
 	var salvarNovo = function(req, res){
@@ -72,10 +76,16 @@ var chamadoController = function(chamadoModel, grupoModel){
 					recuperarRegiaoDaUnidade().then(function(regiao){
 						console.log("vou setar a regiao",regiao[0]._id);
 					
+						if(!chamado.codigo){
+							chamado.codigo = Math.floor(Math.random() * 99999999);
+						}
 						chamado.idRegiao = regiao[0]._id;
 						chamado.nomeRegiao = regiao[0].nome;
 
 						chamado.save();
+
+						// TODO
+						// Varrer todos os atendentes da região e gerar uma notificação
 			
 						res.status(201);
 						res.send(chamado);	
@@ -167,8 +177,8 @@ var chamadoController = function(chamadoModel, grupoModel){
 	};
 
 
-	var iniciarAtendimento = function(idChamado, idAtendente, nomeAtendente, req, res){
-		console.log(' ::: Iniciar atendimento chamado ');
+	var pegarAtendimento = function(idChamado, idAtendente, nomeAtendente, req, res){
+		console.log(' ::: pegar atendimento chamado ');
 		if(!idChamado || !idAtendente){
 			res.status(403).end("ID do chamado e ID do atentente são obrigatórios para iniciar um atendimento.");
 		} else {
@@ -176,9 +186,10 @@ var chamadoController = function(chamadoModel, grupoModel){
 				if(err){
 					res.status(500).send(err);
 				} else if(chamado) {
+					console.log(chamado);
 					
 						if(chamado.dataApoio){
-							res.status(403).send('Chamado já está em atendimento');
+							res.status(403).send('Chamado já está atribuido a um atendente');
 						} else {
 							chamado.dataApoio =  moment().second(0).millisecond(0).utc().format();
 							chamado.idAtendente = idAtendente;
@@ -188,6 +199,17 @@ var chamadoController = function(chamadoModel, grupoModel){
 								if(err){
 									res.status(500).send(err);
 								} else {
+
+									// 	salva notificação para o solicitante saber que o chamado será atendido.
+									var notif = new NotificacaoModel();
+									notif.dono = chamado.dono;
+									notif.idPessoa = chamado.idSolicitante;
+									notif.idChamado = chamado._id;
+									notif.msg = "Olá "+chamado.nomeSolicitante+". O atendente "+nomeAtendente+" está a caminho.";
+
+									NotificacaoController.salvarNovoSimples(notif);
+
+									// retorna ok para chamador
 									console.log('vai retornar 201 - chamado em atendimento');
 									res.status(201).send("OK");
 								}
@@ -203,6 +225,43 @@ var chamadoController = function(chamadoModel, grupoModel){
 		
 	};
 
+
+	var iniciarAtendimento = function(idChamado, idAtendente, req, res){
+		console.log(' ::: Iniciar atendimento chamado ');
+		if(!idChamado || !idAtendente){
+			res.status(403).end("ID do chamado e ID do atentente são obrigatórios para iniciar um atendimento.");
+		} else {
+			chamadoModel.findById(idChamado, function(err, chamado){
+				if(err){
+					res.status(500).send(err);
+				} else if(chamado) {
+					
+						if(chamado.dataInicioAtendimento){
+							res.status(403).send('Chamado já está em atendimento');
+						} else if(chamado.idAtendente != idAtendente){
+							res.status(403).send('Chamado está atribuido a outro atendente. Por isso você não pode iniciar esse chamado.');
+						} else {
+							chamado.dataInicioAtendimento =  moment().second(0).millisecond(0).utc().format();
+
+							chamado.save(function(err){
+								if(err){
+									res.status(500).send(err);
+								} else {
+
+									console.log('vai retornar 201 - chamado em atendimento');
+									res.status(201).send("OK");
+								}
+							});
+						}
+
+				} else {
+					res.status(404).send('Chamado não encontrado');
+				}
+			});
+		}
+
+		
+	};
 
 	var finalizarAtendimento = function(idChamado, req, res){
 		console.log(' ::: Finalizar atendimento chamado ');
@@ -221,6 +280,16 @@ var chamadoController = function(chamadoModel, grupoModel){
 						if(err){
 							res.status(500).send(err);
 						} else {
+
+						// 	salva notificação para o solicitante saber que o chamado foi fechado.
+							var notif = new NotificacaoModel();
+							notif.dono = chamado.dono;
+							notif.idPessoa = chamado.idSolicitante;
+							notif.idChamado = chamado._id;
+							notif.msg = "Olá "+chamado.nomeSolicitante+". O chamado "+chamado.codigo+" foi fechado pelo atendente.";
+
+							NotificacaoController.salvarNovoSimples(notif);
+
 							console.log('vai retornar 201 - chamado finalizado');
 							res.status(201).send("OK");
 						}
@@ -402,6 +471,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 		avaliarAtendimento : avaliarAtendimento,
 		finalizarAtendimento : finalizarAtendimento,
 		iniciarAtendimento : iniciarAtendimento,
+		pegarAtendimento : pegarAtendimento,
 		atualizar 	: atualizar,
 		listar 		: listar,
 		remover 	: remover,

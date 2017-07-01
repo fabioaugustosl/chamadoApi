@@ -8,10 +8,16 @@ var ChamadoController = require('../controller/ChamadoController')(ChamadoModel)
 
 
 
-chamadoUtilRouter.route('/iniciar/:idChamado/:idAtendente/:nomeAtendente')
+chamadoUtilRouter.route('/pegar/:idChamado/:idAtendente/:nomeAtendente')
 		.post(function(req, res){
 			console.log('chegou no iniciar atendimento');
-			ChamadoController.iniciarAtendimento(req.params.idChamado,req.params.idAtendente,req.params.nomeAtendente, req, res);
+			ChamadoController.pegarAtendimento(req.params.idChamado,req.params.idAtendente,req.params.nomeAtendente, req, res);
+		});
+
+chamadoUtilRouter.route('/iniciar/:idChamado/:idAtendente')
+		.post(function(req, res){
+			console.log('chegou no iniciar atendimento');
+			ChamadoController.iniciarAtendimento(req.params.idChamado,req.params.idAtendente, req, res);
 		});
 
 chamadoUtilRouter.route('/finalizar/:idChamado')

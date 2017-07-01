@@ -21,20 +21,22 @@ chamadoRouter.use('/:chamadoId', function(req, res, next){
 	console.log('chegou no middleware chamado route');
 	
 	// esse é nosso middleware
-	chamadoModel.findById(req.params.chamadoId, function(err, chamado){
-		if(err){
-			res.status(500).send(err);
-		} else if(chamado) {
-			console.log('find by id route');
-			req.chamado = chamado;
-			
-			console.log(req.chamado.status);
+	chamadoModel.findById(req.params.chamadoId)
+		.populate('itens')
+		.exec( function(err, chamado){
+			if(err){
+				res.status(500).send(err);
+			} else if(chamado) {
+				console.log('find by id route');
+				req.chamado = chamado;
+				
+				console.log(req.chamado.status);
 
-			
-			next();
-		} else {
-			res.status(404).send('Chamado não encontrado');
-		}
+				
+				next();
+			} else {
+				res.status(404).send('Chamado não encontrado');
+			}
 	});
 });
 

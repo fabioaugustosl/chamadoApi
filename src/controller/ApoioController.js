@@ -13,7 +13,7 @@ var apoioController = function(apoioModel){
 			msgObrigatorio+= 'Dono é obrigatório.<br/>';
 		}
 		
-		if(!req.body.idEmpresa) {
+		if(!req.body.empresa) {
 			msgObrigatorio+= 'Empresa é obrigatório.<br/>';
 		}
 
@@ -73,13 +73,15 @@ var apoioController = function(apoioModel){
 	var listar = function(req, res){
 		console.log(' ::: Listar apoio');
 		
-		apoioModel.find(req.query, function(err, apoios){
-			if(err){
-				res.status(500).send(err);
-			} else {
-				res.json(apoios);
-			}
-		});
+		apoioModel.find(req.query)
+			.populate('empresa')
+			.exec(function(err, apoios){
+				if(err){
+					res.status(500).send(err);
+				} else {
+					res.json(apoios);
+				}
+			});
 	};
 
 

@@ -17,7 +17,7 @@ var regiaoController = function(regiaoModel, unidadeModel){
 		}
 
 
-		if(!req.body.idEmpresa) {
+		if(!req.body.empresa) {
 			msgObrigatorio+= 'Empresa é obrigatória.<br/>';
 		}
 

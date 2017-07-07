@@ -6,6 +6,7 @@ var classificadorStatus = require('../util/ClassificadorStatusChamado');
 
 /*Controller para gerar as notificações a medida que as acoes no chamado forem ocorrendo*/
 var NotificacaoModel = require('../models/NotificacaoModel');
+var RegiaoModel = require('../models/RegiaoModel');
 var NotificacaoController = require('../controller/NotificacaoController')(NotificacaoModel);
 
 var chamadoController = function(chamadoModel, grupoModel){
@@ -177,7 +178,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 	};
 
 
-	var pegarAtendimento = function(idChamado, idAtendente, nomeAtendente, req, res){
+	var pegarAtendimento = function(idChamado, idAtendente, nomeAtendente, previsaoMinutos, req, res){
 		console.log(' ::: pegar atendimento chamado ');
 		if(!idChamado || !idAtendente){
 			res.status(403).end("ID do chamado e ID do atentente são obrigatórios para iniciar um atendimento.");
@@ -194,6 +195,12 @@ var chamadoController = function(chamadoModel, grupoModel){
 							chamado.dataApoio =  moment().second(0).millisecond(0).utc().format();
 							chamado.idAtendente = idAtendente;
 							chamado.nomeAtendente = nomeAtendente;
+							if(previsaoMinutos){
+								chamado.previsaoChegada = previsaoMinutos;	
+							} else {
+								chamado.previsaoChegada = '5';
+							}
+							
 
 							chamado.save(function(err){
 								if(err){
@@ -466,7 +473,90 @@ var chamadoController = function(chamadoModel, grupoModel){
 	};
 
 
+	var listarChamadosAbertosPorRegiaoDoAtendente = function(idAtendente,  req, res){
+		console.log(' ::: Listar Chamados abertos por regiao do atendimento');
+
+
+		var recuperarRegiaoDoAtendente = function() {
+		  	var deferred = q.defer();
+
+			RegiaoModel.find({apoios : idAtendente},  function(err, regioes){
+				if(err){
+					res.status(500).send(err);
+				} else {
+					deferred.resolve(regioes);
+				}
+			});
+
+			return deferred.promise;
+		};
+
+
+			
+		recuperarRegiaoDoAtendente().then(function(regioes) {
+			if(regioes){
+				var regiaoIn = [];
+				for(var i = 0 ; i< regioes.length ; i++){
+					regiaoIn.push(regioes[i]._id);
+				}
+
+				console.log(regiaoIn);
+
+				var query = [];
+		
+				query.push({deletado : false});
+				query.push({dataFim :  null});
+				query.push({dataApoio :  null});
+				query.push({dataInicioAtendimento :  null});
+				query.push({idRegiao  : { $in : regiaoIn }});
+			
+				
+				var queryFinal = { $and: query };
+
+				console.log(queryFinal);
+
+				chamadoModel.find( queryFinal , function(err, chamados){
+					if(err){
+						res.status(500).send(err);
+					} else {
+						console.log(chamados);
+						res.json(chamados);
+					}
+				});
+			}
+		});
+	};
+
+
+	var listarChamadoEmAtendimento = function(idAtende,  req, res){
+		console.log(' ::: Listar Chamados abertos em atendimento por atendente');
+
+		var query = [];
+
+		query.push({deletado : false});
+		query.push({dataFim :  null});
+		query.push({idAtendente :  idAtende});
+		
+		
+		var queryFinal = { $and: query };
+
+		console.log(queryFinal);
+
+		chamadoModel.find( queryFinal , function(err, chamados){
+			if(err){
+				res.status(500).send(err);
+			} else {
+				console.log(chamados);
+				res.json(chamados);
+			}
+		});
+	};
+
+
+
 	return {
+		listarChamadosAbertosPorRegiaoDoAtendente : listarChamadosAbertosPorRegiaoDoAtendente, 
+		listarChamadoEmAtendimento : listarChamadoEmAtendimento,
 		listarChamadosPorSolicitante : listarChamadosPorSolicitante,
 		avaliarAtendimento : avaliarAtendimento,
 		finalizarAtendimento : finalizarAtendimento,

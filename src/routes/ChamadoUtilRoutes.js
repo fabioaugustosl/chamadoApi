@@ -8,10 +8,10 @@ var ChamadoController = require('../controller/ChamadoController')(ChamadoModel)
 
 
 
-chamadoUtilRouter.route('/pegar/:idChamado/:idAtendente/:nomeAtendente')
+chamadoUtilRouter.route('/pegar/:idChamado/:idAtendente/:nomeAtendente/:previsaoEmMinutos')
 		.post(function(req, res){
 			console.log('chegou no iniciar atendimento');
-			ChamadoController.pegarAtendimento(req.params.idChamado,req.params.idAtendente,req.params.nomeAtendente, req, res);
+			ChamadoController.pegarAtendimento(req.params.idChamado,req.params.idAtendente,req.params.nomeAtendente, req.params.previsaoEmMinutos, req, res);
 		});
 
 chamadoUtilRouter.route('/iniciar/:idChamado/:idAtendente')
@@ -49,6 +49,19 @@ chamadoUtilRouter.route('/fechados/:idSolicitante')
 			console.log('chegou listar chamados fechados por solicitantes');
 			ChamadoController.listarChamadosPorSolicitante(req.params.idSolicitante, 0, req, res);
 		});
+
+chamadoUtilRouter.route('/abertosPorRegiao/:idAtendente')
+		.get(function(req, res){
+			console.log('chegou listar chamados abertoa por regiao do atendente');
+			ChamadoController.listarChamadosAbertosPorRegiaoDoAtendente(req.params.idAtendente,req, res);
+		});
+
+chamadoUtilRouter.route('/emAtendimento/:idAtendente')
+		.get(function(req, res){
+			console.log('chegou listar chamado em atendimento de um atendente');
+			ChamadoController.listarChamadoEmAtendimento(req.params.idAtendente,req, res);
+		});
+
 
 
 module.exports = chamadoUtilRouter;

@@ -153,11 +153,8 @@ var chamadoController = function(chamadoModel, grupoModel){
 						chamado.nomeCategoria = req.body.nomeCategoria;	
 					}
 
-					console.log(req.body.itens);
-					//for(var p in req.body.itens){
-					//	console.log(p)
-						chamado.itens = req.body.itens;	
-					//}
+					console.log('item: ',req.body.idItem);
+					chamado.itens = [req.body.idItem];	
 					
 					chamado.save(function(err){
 						console.log('call back atualizacao chamado');
@@ -233,38 +230,78 @@ var chamadoController = function(chamadoModel, grupoModel){
 	};
 
 
-	var iniciarAtendimento = function(idChamado, idAtendente, req, res){
+	var iniciarAtendimento = function(idChamado, idAtende, req, res){
 		console.log(' ::: Iniciar atendimento chamado ');
-		if(!idChamado || !idAtendente){
+		if(!idChamado || !idAtende){
 			res.status(403).end("ID do chamado e ID do atentente são obrigatórios para iniciar um atendimento.");
 		} else {
-			chamadoModel.findById(idChamado, function(err, chamado){
-				if(err){
-					res.status(500).send(err);
-				} else if(chamado) {
-					
-						if(chamado.dataInicioAtendimento){
-							res.status(403).send('Chamado já está em atendimento');
-						} else if(chamado.idAtendente != idAtendente){
-							res.status(403).send('Chamado está atribuido a outro atendente. Por isso você não pode iniciar esse chamado.');
-						} else {
-							chamado.dataInicioAtendimento =  moment().second(0).millisecond(0).utc().format();
+			
 
-							chamado.save(function(err){
-								if(err){
-									res.status(500).send(err);
-								} else {
+			var validarAtendenteJaPussuiChamadoEmAndamento = function() {
+			  	var deferred = q.defer();
 
-									console.log('vai retornar 201 - chamado em atendimento');
-									res.status(201).send("OK");
-								}
-							});
-						}
+			  	var query = [];
 
+				query.push({deletado : false});
+				query.push({dataFim :  null});
+				query.push({idAtendente :  idAtende});
+				
+				var queryFinal = { $and: query };
+
+			  	chamadoModel.find(queryFinal).count().exec(
+			  		function(err, count){
+					if(!err){
+				  		deferred.resolve(count);
+					} 
+				});
+
+			  	return deferred.promise;
+			};
+
+
+			var iniciar = function(){
+				chamadoModel.findById(idChamado, function(err, chamado){
+					if(err){
+						res.status(500).send(err);
+					} else if(chamado) {
+						
+							if(chamado.dataInicioAtendimento){
+								res.status(403).send('Chamado já está em atendimento');
+							} else if(chamado.idAtendente != idAtende){
+								res.status(403).send('Chamado está atribuido a outro atendente. Por isso você não pode iniciar esse chamado.');
+							} else {
+								chamado.dataInicioAtendimento =  moment().second(0).millisecond(0).utc().format();
+
+								chamado.save(function(err){
+									if(err){
+										res.status(500).send(err);
+									} else {
+
+										console.log('vai retornar 201 - chamado em atendimento');
+										res.status(201).send("OK");
+									}
+								});
+							}
+
+					} else {
+						res.status(404).send('Chamado não encontrado');
+					}
+				});
+			};
+
+
+			validarAtendenteJaPussuiChamadoEmAndamento().then(function(total) {
+ 				//console.log('recuperou o total por pessoa');
+ 				if(total > 0){
+					console.log("Você já possui um chamado em andamento.");
+					res.status(403);
+					res.end('Você já possui um chamado em andamento.');
 				} else {
-					res.status(404).send('Chamado não encontrado');
+					iniciar();
 				}
-			});
+ 			});
+
+			
 		}
 
 		

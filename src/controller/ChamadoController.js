@@ -135,7 +135,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 		console.log("idCategoria : ",req.body.idCategoria);
 		console.log("nomeCategoria : ",req.body.nomeCategoria);
 
-		if(!req.body.itens){
+		if(!req.body.idItem){
 			res.status(403).end("É necessário informa um item para completar a avaliação");
 		} else {
 

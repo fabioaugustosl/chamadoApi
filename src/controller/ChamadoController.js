@@ -71,6 +71,32 @@ var chamadoController = function(chamadoModel, grupoModel){
 			  	return deferred.promise;
 			};
 
+
+
+			var gerarNotificacoesParaAtendentes = function(chamado){
+
+				RegiaoModel.findById(chamado.idRegiao)
+					.populate('apoios')
+					.exec(function(err, regiao){
+						if(!err){
+							if(regiao.apoios){
+								console.log('Apoios que serão notificados : ',regiao.apoios);
+								for(var i = 0 ; i< regiao.apoios.length ; i++){
+									var notif = new NotificacaoModel();
+									notif.dono = chamado.dono;
+									notif.idPessoa = regiao.apoios[i]._id;
+									notif.idChamado = chamado._id;
+									notif.msg = "Olá "+regiao.apoios[i].nome+". Foi aberto um novo chamado. Sala: "+chamado.nomeUnidade+"."
+
+									NotificacaoController.salvarNovoSimples(notif);
+								}
+
+							}
+						}
+					});
+
+			};
+
 			
 			recuperarChamadoAbertoParaEsseSolicitanteEUnidade().then(function(total) {
 				if(!total || total == 0){
@@ -85,8 +111,8 @@ var chamadoController = function(chamadoModel, grupoModel){
 
 						chamado.save();
 
-						// TODO
 						// Varrer todos os atendentes da região e gerar uma notificação
+						gerarNotificacoesParaAtendentes(chamado);
 			
 						res.status(201);
 						res.send(chamado);	
@@ -96,7 +122,6 @@ var chamadoController = function(chamadoModel, grupoModel){
 					res.end('Já existe um chamado aberto deste solicitante para essa unidade.');
 				}
 			});
-
 
 		}
 

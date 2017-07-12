@@ -1,4 +1,5 @@
 	
+var md5 = require('md5');
 var moment = require('moment');
 var apoioController = function(apoioModel){
 
@@ -21,6 +22,10 @@ var apoioController = function(apoioModel){
 			msgObrigatorio+= 'Nome é obrigatório.<br/>';
 		}
 
+		if(apoio.senha){
+			var hash = md5(senha);
+			apoio.senha = hash;
+		}
 
 		if(msgObrigatorio != '') {
 			res.status(400);
@@ -56,7 +61,13 @@ var apoioController = function(apoioModel){
 		}
 
 		for(var p in req.body){
+			if(p == 'senha' && req.body[p] && req.body[p].length < 20){
+				var hash = md5(req.body[p]);
+				req.body[p] = hash;
+			} 
+			
 			req.apoio[p] = req.body[p];	
+			
 		}
 		
 		console.log(req.apoio);

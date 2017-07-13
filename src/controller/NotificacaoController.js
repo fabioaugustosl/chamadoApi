@@ -80,6 +80,7 @@ var notificacaoController = function(notificacaoModel){
 				} else if(notificacao) {
 					
 					notificacao.dataLeitura = moment().second(0).millisecond(0).utc().format();
+					notificacao.lido = true;
 					
 					notificacao.save(function(err){
 						console.log('call back atualizacao chamado');

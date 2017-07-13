@@ -59,7 +59,9 @@ var chamadoController = function(chamadoModel, grupoModel){
 			  	var deferred = q.defer();
 
 			  	//console.log('Vai pesquisar pela unidade : ', chamado.idUnidade)
-			   	grupoModel.find({ unidades : { $all : [chamado.idUnidade] }}, function(err, regiao){
+			   	grupoModel.find({ unidades : { $all : [chamado.idUnidade] }})
+			   	.populate('empresa')
+			   	.exec(function(err, regiao){
 			   		//console.log('chegou no log do promise de recuperar a regiao da unidade: ', regiao);
 					if(err){
 						res.status(500).send(err);
@@ -102,7 +104,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 				if(!total || total == 0){
 					recuperarRegiaoDaUnidade().then(function(regiao){
 						console.log("vou setar a regiao",regiao[0]._id);
-					
+						chamado.idEmpresa = regiao[0].empresa._id
 						if(!chamado.codigo){
 							chamado.codigo = Math.floor(Math.random() * 99999999);
 						}
@@ -223,7 +225,10 @@ var chamadoController = function(chamadoModel, grupoModel){
 							} else {
 								chamado.previsaoChegada = '5';
 							}
-							
+
+							var dataCriacao = moment(chamado.dataCriacao); 
+							var minutosAteAtribuicao = moment().second(0).millisecond(0).utc().diff(dataCriacao, 'minutes');
+							chamado.minutosAteAtribuicao = minutosAteAtribuicao;
 
 							chamado.save(function(err){
 								if(err){
@@ -270,6 +275,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 
 				query.push({deletado : false});
 				query.push({dataFim :  null});
+				query.push({dataInicioAtendimento :  {$ne: null }});
 				query.push({idAtendente :  idAtende});
 				
 				var queryFinal = { $and: query };
@@ -277,6 +283,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 			  	chamadoModel.find(queryFinal).count().exec(
 			  		function(err, count){
 					if(!err){
+						console.log('chamados em andamento encontrados para esse pessoa: ',count);
 				  		deferred.resolve(count);
 					} 
 				});
@@ -296,7 +303,12 @@ var chamadoController = function(chamadoModel, grupoModel){
 							} else if(chamado.idAtendente != idAtende){
 								res.status(403).send('Chamado está atribuido a outro atendente. Por isso você não pode iniciar esse chamado.');
 							} else {
-								chamado.dataInicioAtendimento =  moment().second(0).millisecond(0).utc().format();
+								
+								var dataApoio = moment(chamado.dataApoio);
+								chamado.dataInicioAtendimento =  moment().second(0).millisecond(0).utc().format();;
+
+								var minutosAteInicio = moment().second(0).millisecond(0).utc().diff(dataApoio, 'minutes');
+								chamado.minutosDaAtribuicaoAteInicio = minutosAteInicio;
 
 								chamado.save(function(err){
 									if(err){
@@ -345,7 +357,10 @@ var chamadoController = function(chamadoModel, grupoModel){
 					res.status(403).send('Chamado já foi finalizado anteriormente');
 				} else {
 					chamado.dataFim =  moment().second(0).millisecond(0).utc().format();
-					
+					var dtInicio = moment(chamado.dataInicioAtendimento); 
+					var minutosAteFim = moment().second(0).millisecond(0).utc().diff(dtInicio, 'minutes');
+					chamado.minutosDoInicioAteFinalizacao = minutosAteFim;
+
 					chamado.save(function(err){
 						if(err){
 							res.status(500).send(err);
@@ -536,6 +551,35 @@ var chamadoController = function(chamadoModel, grupoModel){
 	};
 
 
+	var listarChamadosAbertos = function(donoParam, idEmpresa, req, res){
+		console.log(' ::: Listar Chamados abertos por dono/empresa');
+		var query = [];
+		
+		query.push({dono : donoParam});
+		/*if(idEmpresaParam){
+			query.push({idEmpresa : idEmpresaParam});
+		}*/
+		query.push({deletado : false});
+		query.push({dataFim :  null});
+		
+		
+		var queryFinal = {};
+		if(query && query.length > 0){
+			queryFinal = { $and: query };
+		}
+
+		console.log(queryFinal);
+
+		chamadoModel.find(queryFinal, function(err, chamados){
+			if(err){
+				res.status(500).send(err);
+			} else {
+				res.json(chamados);
+			}
+		});
+	};
+
+
 	var listarChamadosAbertosPorRegiaoDoAtendente = function(idAtendente,  req, res){
 		console.log(' ::: Listar Chamados abertos por regiao do atendimento');
 
@@ -616,8 +660,37 @@ var chamadoController = function(chamadoModel, grupoModel){
 	};
 
 
+	var listarMediaTemposChamados = function(dono, req, res){
+		console.log('entrou na listagem de media de tempos');
+		chamadoModel.aggregate(
+	    [	{
+	            "$match": {
+	                dono: dono
+	            }
+        	},
+			{ "$group": { 
+		        "_id": {empresa: "$idEmpresa"},
+		        "minutosAteAtribuir" : {$sum : "$minutosAteAtribuicao"},
+		        "minutosAteIniciar" : {$sum : "$minutosDaAtribuicaoAteInicio"},
+		        "minutosAteFichar" : {$sum : "$minutosDoInicioAteFinalizacao"},
+	            "total": {$sum: 1}
+			}}
+	    ],
+	    function(err,result) {
+	    	console.log(result);
+	    	res.status(201);
+			res.send(result);
+
+
+	       // Result is an array of documents
+	    }
+		);
+	};
+
 
 	return {
+		listarMediaTemposChamados : listarMediaTemposChamados,
+		listarChamadosAbertos : listarChamadosAbertos,
 		listarChamadosAbertosPorRegiaoDoAtendente : listarChamadosAbertosPorRegiaoDoAtendente, 
 		listarChamadoEmAtendimento : listarChamadoEmAtendimento,
 		listarChamadosPorSolicitante : listarChamadosPorSolicitante,

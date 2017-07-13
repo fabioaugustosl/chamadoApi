@@ -40,6 +40,7 @@ app.use(function (req, res, next) {
 //rotas
 var chamadoRouter = require('./src/routes/ChamadoRoutes');
 var chamadoUtilRouter = require('./src/routes/ChamadoUtilRoutes');
+var chamadoInfoRouter = require('./src/routes/ChamadoInfoRoutes');
 var regiaoRouter = require('./src/routes/RegiaoRoutes');
 var agrupamentoRouter = require('./src/routes/AgrupamentoRoutes');
 var unidadeRouter = require('./src/routes/UnidadeRoutes');
@@ -61,6 +62,8 @@ app.use('/api/categoria/v1', categoriaRouter);
 app.use('/api/item/v1', itemRouter);
 app.use('/api/apoio/v1', apoioRouter);
 app.use('/api/notificacao/v1', notificacaoRouter);
+app.use('/api/chamadoInfo/v1', chamadoInfoRouter);
+
 
 
 app.get('/', function(req, res){

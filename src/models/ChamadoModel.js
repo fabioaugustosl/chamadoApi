@@ -9,6 +9,7 @@ var mongoose = require('mongoose'),
 var chamadoModel = new Schema({
 	dono: {type:String,lowercase: true, trim: true},
 	codigo: {type:String},
+	idEmpresa: {type:String},
 	idRegiao: {type:String},
 	nomeRegiao: {type:String},
 	idSolicitante: {type:String},
@@ -26,6 +27,9 @@ var chamadoModel = new Schema({
 	dataInicioAtendimento:{ type: Date},
 	dataFim:{ type: Date},
 	deletado:{type:Boolean, default: false},
+	minutosAteAtribuicao:{type: Number},
+	minutosDaAtribuicaoAteInicio:{type: Number},
+	minutosDoInicioAteFinalizacao:{type: Number},
 	status:{type:String}
 });
 

@@ -16,7 +16,7 @@ var chamadoModel = new Schema({
 	nomeSolicitante: {type:String},
 	idAtendente: {type:String},
 	nomeAtendente: {type:String},
-	idUnidade: {type:String},
+	idUnidade: {type: Schema.Types.ObjectId, ref:'Unidade'},
 	nomeUnidade: {type:String},
 	idCategoria: {type:String},
 	nomeCategoria: {type:String},

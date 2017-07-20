@@ -460,6 +460,11 @@ var chamadoController = function(chamadoModel, grupoModel){
                 });
 			}
 
+
+			if(req.query.idEmpresa){
+				query.push({idEmpresa : req.query.idEmpresa});
+			}
+
 			if(req.query.deletado){
 				query.push({deletado : req.query.deletado});
 			}

@@ -435,7 +435,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 
 	var listar = function(req, res){
 		console.log(' ::: Listar Chamados');
-		var query = {};
+		var query = [];
 		//console.log(moment().format()); 	
 		if(req.query){
 			//query = req.query;

@@ -650,7 +650,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 	};
 
 
-	var listarChamadoEmAtendimento = function(idAtende,  req, res){
+	var listarChamadoEmAtendimento = function(idAtende, req, res){
 		console.log(' ::: Listar Chamados abertos em atendimento por atendente');
 
 		var query = [];
@@ -711,12 +711,124 @@ var chamadoController = function(chamadoModel, grupoModel){
 	};
 
 
+
+	var listarResumoQtdChamadosUltimos = function(dono, req, res){
+		console.log('entrou na listagem de qtd ultimos dias');
+		chamadoModel.aggregate(
+	    [	
+	    	{
+	           "$match": {
+	                dono: dono
+	            }
+        	},
+			{ "$group": { 
+		        "_id": 
+	             {
+	               	ano: {$year: "$dataCriacao"},
+	               	mes: {$month: "$dataCriacao"},
+	               	dia: {$dayOfMonth: "$dataCriacao"}
+	             }, 
+	             "total": {$sum: 1}
+			}}
+			//,
+	        // Sorting pipeline
+	        ,{ "$sort": {  "_id.ano": -1 , "_id.mes": -1 , "_id.dia": 1 } }
+	        // Optionally limit results
+	        ,{ "$limit": 15 }
+	    ],
+	    function(err,result) {
+	    	console.log(result);
+	    	res.status(201);
+			res.send(result);
+	    }
+		);
+	};
+
+
+	var listarTotaisChamadosDia = function(donoChamado, data, req, res){
+		console.log('entrou na listagem de totais compilados de chamados por dia');
+		
+		var recuperarChamadosDoDia = function() {
+		  	var deferred = q.defer();
+
+		  	var query = [];
+		  	if(!data){
+		  		data = moment();
+		  	}
+			query.push({dataCriacao : moment(data, "DD-MM-YYYY").format()});
+			query.push({deletado : false});
+			query.push({dono : donoChamado});
+
+			console.log(query);
+			var queryFinal = {};
+			if(query && query.length > 0){
+				queryFinal = { $and: query };
+			}
+
+			chamadoModel.find(queryFinal)
+				.exec(function(err, chamados){
+					console.log('chamdos do dia: ',chamados);
+					if(!err){
+						var returnChamados = [];
+						chamados.forEach(function(element, index, array){
+							var chamadoObj = element.toJSON();
+							chamadoObj.status = classificadorStatus(chamadoObj);
+							returnChamados.push(chamadoObj);
+						});
+
+				  		deferred.resolve(returnChamados);
+					}
+				});
+
+		  	return deferred.promise;
+		};
+
+		recuperarChamadosDoDia().then(function(chamados) {
+			var returnCompilado = [];
+			var totalAbertos = chamados.length;
+			var totalEmAndamento = 0;
+			var totalACaminho = 0;
+			var totalFechados = 0;
+
+			console.log('chegou no nivel de agrupamento pr status');
+
+			chamados.forEach(function(element, index, array){
+
+				var chamadoObj = element;
+				//console.log(chamadoObj);
+				if(chamadoObj.status == "Finalizado"){
+	    			totalFechados++;	
+	    		} else if(chamadoObj.status == "Em atendimento"){
+	    			totalEmAndamento++
+	    		} else if(chamadoObj.status == "A caminho"){
+	    			totalACaminho++;
+	    		} 
+			});	
+
+			returnCompilado.push({abertos : totalAbertos});
+			returnCompilado.push({andamento : totalEmAndamento});
+			returnCompilado.push({caminho : totalACaminho});
+			returnCompilado.push({fechados : totalFechados});
+			console.log(returnCompilado);
+			
+			res.status(201);
+			res.json(returnCompilado);
+
+		});
+
+	};
+
+
+
+
 	return {
+		listarTotaisChamadosDia : listarTotaisChamadosDia,
 		listarMediaTemposChamados : listarMediaTemposChamados,
 		listarChamadosAbertos : listarChamadosAbertos,
 		listarChamadosAbertosPorRegiaoDoAtendente : listarChamadosAbertosPorRegiaoDoAtendente, 
 		listarChamadoEmAtendimento : listarChamadoEmAtendimento,
 		listarChamadosPorSolicitante : listarChamadosPorSolicitante,
+		listarResumoQtdChamadosUltimos : listarResumoQtdChamadosUltimos,
 		avaliarAtendimento : avaliarAtendimento,
 		finalizarAtendimento : finalizarAtendimento,
 		iniciarAtendimento : iniciarAtendimento,

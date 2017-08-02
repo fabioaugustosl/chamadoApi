@@ -26,5 +26,18 @@ chamadoUtilRouter.route('/chamadosAbertos/:dono/:idEmpresa')
 			ChamadoController.listarChamadosAbertos(req.params.dono,req.params.idEmpresa,req, res);
 		});
 
+chamadoUtilRouter.route('/chamadosDia/:dono/:data')
+		.get(function(req, res){
+			console.log('vai listar o total de chamados do dia');
+			ChamadoController.listarTotaisChamadosDia(req.params.dono, req.params.data, req, res);
+		});
+
+chamadoUtilRouter.route('/qtdChamadosUltimos/:dono')
+		.get(function(req, res){
+			console.log('vai listar qtd de chamados dos ultimos dias');
+			ChamadoController.listarResumoQtdChamadosUltimos(req.params.dono, req, res);
+		});
+		
+		
 
 module.exports = chamadoUtilRouter;

@@ -23,7 +23,7 @@ var apoioController = function(apoioModel){
 		}
 
 		if(apoio.senha){
-			var hash = md5(senha);
+			var hash = md5(apoio.senha);
 			apoio.senha = hash;
 		}
 
@@ -56,6 +56,7 @@ var apoioController = function(apoioModel){
 
 	var atualizar = function(req, res){
 		console.log(' ::: Atualizar apoio');
+		delete req.body.__v;
 		if(req.body._id){
 			delete req.body._id;
 		}
@@ -83,8 +84,25 @@ var apoioController = function(apoioModel){
 
 	var listar = function(req, res){
 		console.log(' ::: Listar apoio');
+
+		var query = [];
+
+		if(req.query){
+
+			if(req.query.nome){
+				query.push({nome : RegExp(req.query.nome, "i") });
+			}
+
+		}
+		 
+		console.log(query);
+		var queryFinal = {};
+		if(query && query.length > 0){
+			queryFinal = { $and: query };
+		}
+
 		
-		apoioModel.find(req.query)
+		apoioModel.find(queryFinal)
 			.populate('empresa')
 			.exec(function(err, apoios){
 				if(err){

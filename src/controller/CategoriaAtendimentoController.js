@@ -88,6 +88,7 @@ var categoriaController = function(categoriaModel,itemAtendimentoModel){
 
 	var atualizar = function(req, res){
 		console.log(' ::: Atualizar categoria');
+		delete req.body.__v;
 		if(req.body._id){
 			delete req.body._id;
 		}

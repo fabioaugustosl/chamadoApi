@@ -77,6 +77,7 @@ var regiaoController = function(regiaoModel, unidadeModel){
 
 	var atualizar = function(req, res){
 		console.log(' ::: Atualizar regiao ');
+		delete req.body.__v;
 		if(req.body._id){
 			delete req.body._id;
 		}

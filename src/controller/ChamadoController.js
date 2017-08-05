@@ -755,11 +755,15 @@ var chamadoController = function(chamadoModel, grupoModel){
 		  	if(!data){
 		  		data = moment();
 		  	}
-			query.push({dataCriacao : moment(data, "DD-MM-YYYY").format()});
+		  	var dataInicioDia = moment(data, "DD-MM-YYYY");
+		  	var dataFimDia = moment(data, "DD-MM-YYYY");; 
+		  	dataFimDia.set({hour:23,minute:59,second:59,millisecond:99})
+		  	
+			query.push({dataCriacao : { $gte: dataInicioDia, $lt: dataFimDia }});
 			query.push({deletado : false});
 			query.push({dono : donoChamado});
 
-			console.log(query);
+			//console.log(query);
 			var queryFinal = {};
 			if(query && query.length > 0){
 				queryFinal = { $and: query };
@@ -767,7 +771,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 
 			chamadoModel.find(queryFinal)
 				.exec(function(err, chamados){
-					console.log('chamdos do dia: ',chamados);
+					//console.log('chamdos do dia: ',chamados);
 					if(!err){
 						var returnChamados = [];
 						chamados.forEach(function(element, index, array){
@@ -790,7 +794,8 @@ var chamadoController = function(chamadoModel, grupoModel){
 			var totalACaminho = 0;
 			var totalFechados = 0;
 
-			console.log('chegou no nivel de agrupamento pr status');
+			//console.log('chegou no nivel de agrupamento pr status');
+			//console.log(chamados);
 
 			chamados.forEach(function(element, index, array){
 

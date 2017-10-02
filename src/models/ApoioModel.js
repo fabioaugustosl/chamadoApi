@@ -11,6 +11,7 @@ var apoioModel = new Schema({
 	login: {type:String},
 	senha: {type:String},
 	linkImagem: {type:String},
+	super: {type:Boolean},
 	codigo: {type:String}
 });
 

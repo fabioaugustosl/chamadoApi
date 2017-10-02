@@ -93,6 +93,18 @@ var apoioController = function(apoioModel){
 				query.push({nome : RegExp(req.query.nome, "i") });
 			}
 
+			if(req.query.super){
+				query.push({super : req.query.super});
+			}
+
+			if(req.query.login){
+				query.push({login : req.query.login});
+			}
+
+			if(req.query.email){
+				query.push({email : RegExp(req.query.email, "i") });
+			}
+
 		}
 		 
 		console.log(query);

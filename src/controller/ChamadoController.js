@@ -7,6 +7,7 @@ var classificadorStatus = require('../util/ClassificadorStatusChamado');
 /*Controller para gerar as notificações a medida que as acoes no chamado forem ocorrendo*/
 var NotificacaoModel = require('../models/NotificacaoModel');
 var RegiaoModel = require('../models/RegiaoModel');
+var SolicitanteAutorizadoModel = require('../models/SolicitanteAutorizadoModel');
 var NotificacaoController = require('../controller/NotificacaoController')(NotificacaoModel);
 
 var chamadoController = function(chamadoModel, grupoModel){
@@ -21,7 +22,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 		if(!req.body.dono) {
 			msgObrigatorio+= 'Dono é obrigatório.<br/>';
 		}
-		if(!req.body.idSolicitante) {
+		if(!req.body.idSolicitante && !req.body.cpfSolicitante) {
 			msgObrigatorio+= 'Solicitante é obrigatório.<br/>';
 		}
 		if(!req.body.idCategoria) {
@@ -31,7 +32,6 @@ var chamadoController = function(chamadoModel, grupoModel){
 			msgObrigatorio+= 'A unidade de origem do chamado é obrigatória.<br/>';
 		}
 		
-
 		if(msgObrigatorio != '') {
 			res.status(400);
 			res.send(msgObrigatorio);
@@ -52,6 +52,86 @@ var chamadoController = function(chamadoModel, grupoModel){
 				});
 
 			  	return deferred.promise;
+			};
+			
+			// REGRA VALIDACAO 1: (para autorizados) não é permitido um solicitante AUTORIZADO abrir um novo chamado para a mesma unidade, desde que esse chamado ainda esteja aberto. 
+			var recuperarChamadoAbertoParaEsseSolicitanteAutorizadoEUnidade = function() {
+			  	var deferred = q.defer();
+
+			   	chamadoModel.where({ 'dono': chamado.dono , 'idUnidade': chamado.idUnidade, 'cpfSolicitante': chamado.cpfSolicitante, 'deletado': false, 'dataFim': null})
+			   		.count(function (err, count) {
+						console.log('callback do count recuperarChamadoAbertoParaEsseSolicitanteAutorizadoEUnidade :', count );
+						if(!err){
+					  		deferred.resolve(count);
+						}
+					});
+
+			  	return deferred.promise;
+			};
+
+			// CASO O CHAMADO SEJA PROVENIENTE DE UM SOLICITANTE AUTORIZADO DEVE VALIDAR NO CADASTRO SE ELE REALMENTE ESTÀ AUTORIZADO
+			var validarSolicitanteAutorizado = function() {
+			  	var deferred = q.defer();
+
+			  	var query = [];
+				query.push({dono : chamado.dono});
+				query.push({cpf :  chamado.cpfSolicitante});
+
+			   	SolicitanteAutorizadoModel.find(query)
+			   		.exec(function (err, solicitante) {
+						console.log('callback do validarSolicitanteAutorizado :', solicitante );
+						if(!err && solicitante){
+					  		deferred.resolve(solicitante);
+						} 
+					});
+
+			  	return deferred.promise;
+			};
+
+
+			var recuperarRegiaoBackupPorId = function(idRegiao) {
+			  	var deferred = q.defer();
+
+			   	RegiaoModel.findById(idRegiao)
+			   	.populate('empresa')
+			   	.exec(function(err, regiao){
+					if(err){
+						res.status(500).send(err);
+					} else {
+						listarQtdChamadosEmAndamentoDaRegiao(idRegiao).then(function(total){
+							if(total <= 0 || total < regiao[0].apoios.length){
+								deferred.resolve(regiao);
+							} else {
+								deferred.resolve(null);
+							}
+						});
+					}
+				});
+
+			  	return deferred.promise;
+			};
+
+
+			var listarQtdChamadosEmAndamentoDaRegiao = function(idRegiao){
+				var deferred = q.defer();
+
+				var query = [];
+				
+				query.push({idRegiao : idRegiao});
+				query.push({deletado : false});
+				query.push({dataFim :  null});
+				
+				var queryFinal = { $and: query };
+				
+				chamadoModel.where(queryFinal).count(function(err, count){
+					if(err){
+						res.status(500).send(err);
+					} else {
+						deferred.resolve(count);
+					}
+				});
+
+				return deferred.promise;
 			};
 
 
@@ -74,7 +154,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 			};
 
 
-
+			// Após o chamado aberto eh necessário criar uma notificação para todos os apoios daquela região
 			var gerarNotificacoesParaAtendentes = function(chamado){
 
 				RegiaoModel.findById(chamado.idRegiao)
@@ -92,38 +172,111 @@ var chamadoController = function(chamadoModel, grupoModel){
 
 									NotificacaoController.salvarNovoSimples(notif);
 								}
-
 							}
 						}
 					});
 
 			};
 
-			
-			recuperarChamadoAbertoParaEsseSolicitanteEUnidade().then(function(total) {
-				if(!total || total == 0){
-					recuperarRegiaoDaUnidade().then(function(regiao){
-						console.log("vou setar a regiao",regiao[0]._id);
-						chamado.idEmpresa = regiao[0].empresa._id
-						if(!chamado.codigo){
-							chamado.codigo = Math.floor(Math.random() * 99999999);
+
+			// Após as validações de usuario solicitante esse método eh chamado
+			var validarRegiaoEAbrirChamado = function(){
+				recuperarRegiaoDaUnidade().then(function(regiao){
+
+					if(regiao){
+						var criarChamado = function(){
+							console.log("vou setar a regiao",regiao[0]._id);
+							chamado.idEmpresa = regiao[0].empresa._id
+							if(!chamado.codigo){
+								chamado.codigo = Math.floor(Math.random() * 99999999);
+							}
+							chamado.idRegiao = regiao[0]._id;
+							chamado.nomeRegiao = regiao[0].nome;
+
+							chamado.save();
+
+							// Varrer todos os atendentes da região e gerar uma notificação
+							gerarNotificacoesParaAtendentes(chamado);
+				
+							res.status(201);
+							res.send(chamado);
 						}
-						chamado.idRegiao = regiao[0]._id;
-						chamado.nomeRegiao = regiao[0].nome;
 
-						chamado.save();
+						// vai recuperar o total de chamdos abertos .. se não tiver atendentes livres vai verificar 
+						// na regiao de backup. caso exista atendente livre o chamado eh aberto para a regiao de backup
+						listarQtdChamadosEmAndamentoDaRegiao(regiao[0]._id).then(function(totalChamadosDestaRegiao){
+							if(regiao[0].idRegiaoBackup && totalChamadosDestaRegiao > 0 && totalChamadosDestaRegiao >= regiao[0].apoios.length){
+								console.log("Entrou na parada para recuperar o chamado de backup ",regiao[0].idRegiaoBackup);
+								recuperarRegiaoBackupPorId(regiao[0].idRegiaoBackup).then(function(regiaoBackup){
+									console.log('regiao de backup recuperada : ', regiaoBackup);
+									if(regiaoBackup){
+										console.log('vai gerar para a regiao de backup  ');
+										chamado.idEmpresa = regiaoBackup.empresa._id
+										if(!chamado.codigo){
+											chamado.codigo = Math.floor(Math.random() * 99999999);
+										}
+										chamado.idRegiao = regiaoBackup._id;
+										chamado.nomeRegiao = regiaoBackup.nome;
 
-						// Varrer todos os atendentes da região e gerar uma notificação
-						gerarNotificacoesParaAtendentes(chamado);
-			
-						res.status(201);
-						res.send(chamado);	
-					});
-				} else {
-					res.status(403);
-					res.end('Já existe um chamado aberto deste solicitante para essa unidade.');
-				}
-			});
+										chamado.save();
+
+										// Varrer todos os atendentes da região e gerar uma notificação
+										gerarNotificacoesParaAtendentes(chamado);
+							
+										res.status(201);
+										res.send(chamado);
+									} else {
+										criarChamado();
+									}
+								});
+
+							} else {
+								criarChamado();
+							}
+						});
+					} else {
+						res.status(403);
+						res.end('Essa unidade não está cadastrada para receber atendimento. Favor contactar o apoio via telefone..');
+					}		
+				});
+			};
+					
+
+
+			// INICIAR o processo de validação e abertura do chamado
+			if(chamado.cpfSolicitante){
+				// SE FOR UM CHAMADO DE UM ALGUEM AUTORIZADO
+				console.log("INFO : VAI ABRI UM CHAMADO PARA UM SOLICITANTE AUTORIZADO");
+				
+				validarSolicitanteAutorizado().then(function(solicitante){
+					if(solicitante) {
+						recuperarChamadoAbertoParaEsseSolicitanteAutorizadoEUnidade().then(function(total) {
+							if(!total || total == 0){
+								validarRegiaoEAbrirChamado();
+							} else {
+								res.status(403);
+								res.end('Já existe um chamado aberto deste solicitante para essa unidade.');
+							}
+						});
+					} else {
+						res.status(403);
+						res.end('Usuário não autorizado');
+					}
+				});
+				
+			} else { 
+				
+				// SE FOR UM CHAMADO DE UM PROFESSOR CADASTRADO
+				console.log("INFO : VAI ABRI UM CHAMADO PARA UM PROFESSOR LOGADO");
+				recuperarChamadoAbertoParaEsseSolicitanteEUnidade().then(function(total) {
+					if(!total || total == 0){
+						validarRegiaoEAbrirChamado();
+					} else {
+						res.status(403);
+						res.end('Já existe um chamado aberto deste solicitante para essa unidade.');
+					}
+				});
+			}
 
 		}
 
@@ -153,8 +306,10 @@ var chamadoController = function(chamadoModel, grupoModel){
 	};
 
 
-	var avaliarAtendimento = function(idChamado, req, res){
-		console.log(' ::: avaliar chamado ');
+	// esse metodo se chamava AVALIAR.. agora se chama classificar. É usado para que o apoio classifique o
+	// chamado após finalizar
+	var classificarAtendimento = function(idChamado, req, res){
+		console.log(' ::: classificar chamado ');
 		if(req.body._id){
 			delete req.body._id;
 		}
@@ -162,13 +317,14 @@ var chamadoController = function(chamadoModel, grupoModel){
 		console.log("idCategoria : ",req.body.idCategoria);
 		console.log("nomeCategoria : ",req.body.nomeCategoria);
 		console.log('item: ',req.body.idItem);
+		console.log('comentarioEncerramento: ',req.body.comentarioEncerramento);
 
 		if(!req.body.idItem){
-			res.status(403).end("É necessário informa um item para completar a avaliação");
+			res.status(403).end("É necessário informa um item para completar a classificação");
 		} else {
 
 			chamadoModel.findById(idChamado, function(err, chamado){
-				console.log("vai avaliar esse chamado", chamado);
+				console.log("vai classificar esse chamado", chamado);
 				if(err){
 					res.status(500).send(err);
 				} else if(chamado) {
@@ -200,6 +356,39 @@ var chamadoController = function(chamadoModel, grupoModel){
 			});
 		}	
 	
+	};
+
+
+	// avaliação feita pelo solicitando após a finalização do chamado.
+	var avaliarAtendimento = function(idChamado, numeroEstrelas, req, res){
+		console.log(' ::: avaliar chamado ');
+		if(req.body._id){
+			delete req.body._id;
+		}
+
+		chamadoModel.findById(idChamado, function(err, chamado){
+			console.log("vai avaliar esse chamado", chamado);
+			if(err){
+				res.status(500).send(err);
+			} else if(chamado) {
+				if(!chamado.avaliacaoAtendimento){
+					
+					chamado.avaliacaoAtendimento = numeroEstrelas;	
+				
+					chamado.save(function(err){
+						console.log('call back avalicao chamado');
+						if(err){
+							res.status(500).send(err);
+						} else {
+							console.log('vai retornar 201 - avaliado chamado');
+							res.status(201).send("OK");
+						}
+					});
+				}
+			} else {
+				res.status(404).send('Chamado não encontrado');
+			}
+		});
 	};
 
 
@@ -341,9 +530,8 @@ var chamadoController = function(chamadoModel, grupoModel){
 
 			
 		}
-
-		
 	};
+
 
 	var finalizarAtendimento = function(idChamado, req, res){
 		console.log(' ::: Finalizar atendimento chamado ');
@@ -369,7 +557,12 @@ var chamadoController = function(chamadoModel, grupoModel){
 						// 	salva notificação para o solicitante saber que o chamado foi fechado.
 							var notif = new NotificacaoModel();
 							notif.dono = chamado.dono;
-							notif.idPessoa = chamado.idSolicitante;
+							if(chamado.idSolicitante){
+								notif.idPessoa = chamado.idSolicitante;	
+							} else {
+								notif.idPessoa = chamado.cpfSolicitante;
+							}
+							
 							notif.idChamado = chamado._id;
 							notif.msg = "Olá "+chamado.nomeSolicitante+". O chamado "+chamado.codigo+" foi fechado pelo atendente.";
 
@@ -703,8 +896,6 @@ var chamadoController = function(chamadoModel, grupoModel){
 	    	console.log(result);
 	    	res.status(201);
 			res.send(result);
-
-
 	       // Result is an array of documents
 	    }
 		);
@@ -743,6 +934,63 @@ var chamadoController = function(chamadoModel, grupoModel){
 	    }
 		);
 	};
+
+
+	var listarResumoMediaAvaliacoesChamados = function(dono, req, res){
+		console.log('entrou na listarResumoMediaAvaliacoesChamados');
+		chamadoModel.aggregate(
+	    [	
+	    	{
+	           "$match": {
+	                dono: dono
+	            }
+        	},
+			{ 
+				"$group": { 
+		       	"_id": {empresa: "$idEmpresa"},
+		        "mediaAvaliacaoAtendimento" : {$avg : "$avaliacaoAtendimento"}
+			}}
+	    ],
+	    function(err,result) {
+	    	console.log(result);
+	    	res.status(201);
+			res.send(result);
+	    }
+		);
+	};
+
+
+
+	var listarAtendentesOcupadosPorRegiao = function(donoParametro, req, res){
+		console.log('entrou na listagem de atendentes ocupados por regiao');
+
+		var query = [];
+		query.push({dono : donoParametro});
+		query.push({deletado : false});
+		query.push({dataFim :  null});
+		query.push({dataApoio :  {$ne: null }});
+
+		var queryFinal = { $and: query };
+
+		console.log(queryFinal);
+
+		chamadoModel.aggregate(
+	    [	{
+	            "$match": {dono : donoParametro}
+        	},
+        	 
+			{ "$group": { 
+		        "_id": {nomeRegiao: "$nomeRegiao", nomeAtendente : "$nomeAtendente"}
+			}}
+	    ],
+	    function(err,result) {
+	    	console.log(result);
+	    	res.status(201);
+			res.send(result);
+	    }
+		);
+	};
+
 
 
 	var listarTotaisChamadosDia = function(donoChamado, data, req, res){
@@ -834,6 +1082,9 @@ var chamadoController = function(chamadoModel, grupoModel){
 		listarChamadoEmAtendimento : listarChamadoEmAtendimento,
 		listarChamadosPorSolicitante : listarChamadosPorSolicitante,
 		listarResumoQtdChamadosUltimos : listarResumoQtdChamadosUltimos,
+		listarResumoMediaAvaliacoesChamados : listarResumoMediaAvaliacoesChamados,
+		listarAtendentesOcupadosPorRegiao :listarAtendentesOcupadosPorRegiao,
+		classificarAtendimento : classificarAtendimento,
 		avaliarAtendimento : avaliarAtendimento,
 		finalizarAtendimento : finalizarAtendimento,
 		iniciarAtendimento : iniciarAtendimento,

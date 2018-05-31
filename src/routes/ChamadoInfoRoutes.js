@@ -37,7 +37,19 @@ chamadoUtilRouter.route('/qtdChamadosUltimos/:dono')
 			console.log('vai listar qtd de chamados dos ultimos dias');
 			ChamadoController.listarResumoQtdChamadosUltimos(req.params.dono, req, res);
 		});
+
+chamadoUtilRouter.route('/mediaAvaliacaoAtendimento/:dono')
+		.get(function(req, res){
+			console.log('vai listar a media de avaliação dos atendimentos');
+			ChamadoController.listarResumoMediaAvaliacoesChamados(req.params.dono, req, res);
+		});
+
+chamadoUtilRouter.route('/atendentesOcupadosPorRegiao/:idEmpresa')
+		.get(function(req, res){
+			console.log('vai listar os atendentes ocupados por região');
+			ChamadoController.listarAtendentesOcupadosPorRegiao(req.params.idEmpresa, req, res);
+		});
 		
-		
+
 
 module.exports = chamadoUtilRouter;

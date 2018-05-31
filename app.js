@@ -4,7 +4,7 @@ var bodyParser = require('body-parser');
 //var session = require('express-session');
 var mongoose = require('mongoose');
 
-require('./src/models/ItemAtendimentoModel.js');
+//require('./src/models/ItemAtendimentoModel.js');
 
 
 var app = express();
@@ -50,6 +50,8 @@ var categoriaRouter = require('./src/routes/CategoriaRoutes');
 var itemRouter = require('./src/routes/ItemAtendimentoRoutes');
 var apoioRouter = require('./src/routes/ApoioRoutes');
 var notificacaoRouter = require('./src/routes/NotificacaoRoutes');
+var autorizadoRouter = require('./src/routes/SolicitanteAutorizadoRoutes');
+var loginRouter = require('./src/routes/LoginRoutes');
 
 app.use('/api/chamado/v1', chamadoRouter);
 app.use('/api/chamadoUtil/v1', chamadoUtilRouter);
@@ -63,6 +65,9 @@ app.use('/api/item/v1', itemRouter);
 app.use('/api/apoio/v1', apoioRouter);
 app.use('/api/notificacao/v1', notificacaoRouter);
 app.use('/api/chamadoInfo/v1', chamadoInfoRouter);
+app.use('/api/autorizado/v1', autorizadoRouter);
+app.use('/api/login/v1', loginRouter);
+
 
 
 

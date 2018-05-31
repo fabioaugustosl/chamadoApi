@@ -14,6 +14,7 @@ var chamadoModel = new Schema({
 	nomeRegiao: {type:String},
 	idSolicitante: {type:String},
 	nomeSolicitante: {type:String},
+	cpfSolicitante: {type:String},
 	idAtendente: {type:String},
 	nomeAtendente: {type:String},
 	idUnidade: {type: Schema.Types.ObjectId, ref:'Unidade'},
@@ -26,10 +27,12 @@ var chamadoModel = new Schema({
 	dataApoio:{ type: Date},
 	dataInicioAtendimento:{ type: Date},
 	dataFim:{ type: Date},
+	comentarioEncerramento: {type:String},
 	deletado:{type:Boolean, default: false},
 	minutosAteAtribuicao:{type: Number},
 	minutosDaAtribuicaoAteInicio:{type: Number},
 	minutosDoInicioAteFinalizacao:{type: Number},
+	avaliacaoAtendimento:{type: Number},
 	status:{type:String}
 });
 

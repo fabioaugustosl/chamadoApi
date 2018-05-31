@@ -26,10 +26,16 @@ chamadoUtilRouter.route('/finalizar/:idChamado')
 			ChamadoController.finalizarAtendimento(req.params.idChamado, req, res);
 		});
 
-chamadoUtilRouter.route('/avaliar/:idChamado')
+chamadoUtilRouter.route('/classificar/:idChamado')
+		.post(function(req, res){
+			console.log('chegou no classificar atendimento');
+			ChamadoController.classificarAtendimento(req.params.idChamado, req, res);
+		});
+
+chamadoUtilRouter.route('/avaliar/:idChamado/:numeroEstrelas')
 		.post(function(req, res){
 			console.log('chegou no avaliar atendimento');
-			ChamadoController.avaliarAtendimento(req.params.idChamado, req, res);
+			ChamadoController.avaliarAtendimento(req.params.idChamado, req.params.numeroEstrelas, req, res);
 		});
 
 chamadoUtilRouter.route('/remover/:idChamado')
@@ -62,8 +68,6 @@ chamadoUtilRouter.route('/emAtendimento/:idAtendente')
 			ChamadoController.listarChamadoEmAtendimento(req.params.idAtendente,req, res);
 		});
 
-
-		
 
 
 

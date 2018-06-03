@@ -19,11 +19,11 @@ unidadeRouter.use('/:unidadeId', function(req, res, next){
 	console.log('chegou no middleware de unidade route');
 	
 	// esse é nosso middleware
-	UnidadeModel.findById(req.params.unidadeId, function(err, chamado){
+	UnidadeModel.findById(req.params.unidadeId, function(err, unidade){
 		if(err){
 			res.status(500).send(err);
-		} else if(chamado) {
-			req.chamado = chamado;
+		} else if(unidade) {
+			req.unidade = unidade;
 			next();
 		} else {
 			res.status(404).send('Unidade não encontrado');
@@ -34,7 +34,7 @@ unidadeRouter.use('/:unidadeId', function(req, res, next){
 
 unidadeRouter.route('/:unidadeId')
 		.get(function(req, res){
-			res.json(req.chamado);
+			res.json(req.unidade);
 		})
 		.patch(function(req, res){
 			UnidadeController.atualizar(req, res);

@@ -760,11 +760,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 			if(err){
 				res.status(500).send(err);
 			} else {
-				chamadoModel.populate(chamados, {
-				    path: 'idUnidade.idAgrupamento',
-				    select: 'nome',
-				    model: Agrupamento // <== We are populating phones so we need to use the correct model, not User
-				  }, callback);
+				
 
 				var returnChamados = [];
 				chamados.forEach(function(element, index, array){

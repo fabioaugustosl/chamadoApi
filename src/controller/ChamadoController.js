@@ -7,6 +7,7 @@ var classificadorStatus = require('../util/ClassificadorStatusChamado');
 /*Controller para gerar as notificações a medida que as acoes no chamado forem ocorrendo*/
 var NotificacaoModel = require('../models/NotificacaoModel');
 var RegiaoModel = require('../models/RegiaoModel');
+var UnidadeModel = require('../models/UnidadeModel');
 var SolicitanteAutorizadoModel = require('../models/SolicitanteAutorizadoModel');
 var NotificacaoController = require('../controller/NotificacaoController')(NotificacaoModel);
 
@@ -135,6 +136,24 @@ var chamadoController = function(chamadoModel, grupoModel){
 			};
 
 
+			/*var recuperarUnidadeDoChamado = function() {
+			  	var deferred = q.defer();
+
+			  	//console.log('Vai pesquisar pela unidade : ', chamado.idUnidade)
+			   	UnidadeModel.findById(chamado.idUnidade).
+			   	populate("idAgrupamento")
+			   	.exec(function(err, unidade){
+			   		console.log('chegou no log do promise de recuperar a unidade da unidade: ', unidade);
+					if(err){
+						res.status(500).send(err);
+					} else {
+						deferred.resolve(unidade);
+					}
+				});
+
+			  	return deferred.promise;
+			};*/
+
 			var recuperarRegiaoDaUnidade = function() {
 			  	var deferred = q.defer();
 
@@ -252,6 +271,10 @@ var chamadoController = function(chamadoModel, grupoModel){
 					if(solicitante) {
 						recuperarChamadoAbertoParaEsseSolicitanteAutorizadoEUnidade().then(function(total) {
 							if(!total || total == 0){
+								//recuperarUnidadeDoChamado().then(function(unidade){
+								//	chamado.
+								// });
+								
 								validarRegiaoEAbrirChamado();
 							} else {
 								res.status(403);
@@ -564,7 +587,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 							}
 							
 							notif.idChamado = chamado._id;
-							notif.msg = "Olá "+chamado.nomeSolicitante+". O chamado "+chamado.codigo+" foi fechado pelo atendente.";
+							notif.msg = "Olá "+chamado.nomeSolicitante+". O chamado "+chamado.codigo+" foi fechado pelo atendente. Acesse a listagem de chamdos encerrados e avalie o atendimento.";
 
 							NotificacaoController.salvarNovoSimples(notif);
 
@@ -731,7 +754,9 @@ var chamadoController = function(chamadoModel, grupoModel){
 
 		console.log(queryFinal);
 
-		chamadoModel.find(queryFinal, function(err, chamados){
+		chamadoModel.find(queryFinal)
+		.populate("idUnidade")
+		.exec(function(err, chamados){
 			if(err){
 				res.status(500).send(err);
 			} else {

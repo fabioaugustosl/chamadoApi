@@ -9,4 +9,4 @@ var agrupamentoModel = new Schema({
 	qtdAndares: {type:Number}
 });
 
-module.exports = mongoose.model('Agupamento', agrupamentoModel);
+module.exports = mongoose.model('Agrupamento', agrupamentoModel);

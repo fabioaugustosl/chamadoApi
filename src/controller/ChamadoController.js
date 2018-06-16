@@ -755,11 +755,17 @@ var chamadoController = function(chamadoModel, grupoModel){
 		console.log(queryFinal);
 
 		chamadoModel.find(queryFinal)
-		.populate("idUnidade").deepPopulate("idUnidade.idAgrupamento")
+		.populate("idUnidade")
 		.exec(function(err, chamados){
 			if(err){
 				res.status(500).send(err);
 			} else {
+				chamadoModel.populate(chamados, {
+				    path: 'idUnidade.idAgrupamento',
+				    select: 'nome',
+				    model: Agrupamento // <== We are populating phones so we need to use the correct model, not User
+				  }, callback);
+
 				var returnChamados = [];
 				chamados.forEach(function(element, index, array){
 					var chamadoObj = element.toJSON();

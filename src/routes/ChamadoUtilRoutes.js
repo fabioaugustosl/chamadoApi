@@ -46,7 +46,7 @@ chamadoUtilRouter.route('/remover/:idChamado')
 
 chamadoUtilRouter.route('/abertos/:idSolicitante')
 		.get(function(req, res){
-			console.log('chegou listar chamados aberto por solicitantes');
+			console.log('chegou listar chamados aberto por solicitantes : ',req.params.idSolicitante);
 			ChamadoController.listarChamadosPorSolicitante(req.params.idSolicitante, 1, req, res);
 		});
 

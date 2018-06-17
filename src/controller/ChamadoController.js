@@ -755,7 +755,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 		console.log(queryFinal);
 
 		chamadoModel.find(queryFinal)
-		//.populate("idUnidade")
+		.populate("idUnidade").populate("idCategoria")
 		.exec(function(err, chamados){
 			if(err){
 				res.status(500).send(err);

@@ -796,7 +796,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 		console.log(queryFinal);
 
 		chamadoModel.find(queryFinal)
-		.populate("idUnidade").populate("idCategoria")
+		.populate("idUnidade")
 		.exec(function(err, chamados){
 			if(err){
 				res.status(500).send(err);
@@ -860,7 +860,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 				console.log(queryFinal);
 
 				chamadoModel.find( queryFinal )
-				.populate("idUnidade").populate("idCategoria")
+				.populate("idUnidade")
 				.exec(function(err, chamados){
 					if(err){
 						res.status(500).send(err);
@@ -888,7 +888,9 @@ var chamadoController = function(chamadoModel, grupoModel){
 
 		console.log(queryFinal);
 
-		chamadoModel.find( queryFinal , function(err, chamados){
+		chamadoModel.find( queryFinal )
+		.populate("idUnidade")
+		.exec(function(err, chamados){
 			if(err){
 				res.status(500).send(err);
 			} else {

@@ -241,7 +241,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 
 										// Varrer todos os atendentes da região e gerar uma notificação
 										gerarNotificacoesParaAtendentes(chamado);
-							
+										
 										res.status(201);
 										res.send(chamado);
 									} else {
@@ -656,23 +656,23 @@ var chamadoController = function(chamadoModel, grupoModel){
 		if(req.query){
 			//query = req.query;
 			if(req.query.dataCriacao){
-				query.push({dataCriacao : moment(query.dataCriacao, "DD/MM/YYYY").format()});
+				query.push({dataCriacao : moment(query.dataCriacao, "DD/MM/YYYY").utc().format()});
 			} 
 			if(req.query.dataFim){
-				query.push({dataFim : moment(query.dataFim, "DD/MM/YYYY").format()});
+				query.push({dataFim : moment(query.dataFim, "DD/MM/YYYY").utc().format()});
 			}
 
 			if(req.query.dataCriacaoDe && query.dataCriacaoAte){
 				query.push({
-                    $gte: moment(query.dataCriacaoDe, "DD/MM/YYYY").hour(0).minute(0).second(0).millisecond(0).format(),
-                    $lte: moment(query.dataCriacaoAte, "DD/MM/YYYY").hour(23).minute(59).second(59).millisecond(999).format()
+                    $gte: moment(query.dataCriacaoDe, "DD/MM/YYYY").hour(0).minute(0).second(0).millisecond(0).utc().format(),
+                    $lte: moment(query.dataCriacaoAte, "DD/MM/YYYY").hour(23).minute(59).second(59).millisecond(999).utc().format()
                 });
 			}
 
 			if(req.query.dataFimDe && query.dataFimAte){
 				query.push({
-                    $gte: moment(query.dataFimDe, "DD/MM/YYYY").hour(0).minute(0).second(0).millisecond(0).format(),
-                    $lte: moment(query.dataFimAte, "DD/MM/YYYY").hour(23).minute(59).second(59).millisecond(999).format()
+                    $gte: moment(query.dataFimDe, "DD/MM/YYYY").hour(0).minute(0).second(0).millisecond(0).utc().format(),
+                    $lte: moment(query.dataFimAte, "DD/MM/YYYY").hour(23).minute(59).second(59).millisecond(999).utc().format()
                 });
 			}
 

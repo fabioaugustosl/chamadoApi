@@ -216,7 +216,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 
 							// Varrer todos os atendentes da região e gerar uma notificação
 							gerarNotificacoesParaAtendentes(chamado);
-				
+							console.log('CHAMADO SALVO: ', chamado);
 							res.status(201);
 							res.send(chamado);
 						}
@@ -1044,7 +1044,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 			query.push({deletado : false});
 			query.push({dono : donoChamado});
 
-			//console.log(query);
+			console.log(query);
 			var queryFinal = {};
 			if(query && query.length > 0){
 				queryFinal = { $and: query };
@@ -1052,7 +1052,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 
 			chamadoModel.find(queryFinal)
 				.exec(function(err, chamados){
-					//console.log('chamdos do dia: ',chamados);
+					console.log('total chamados do dia: ',chamados.length);
 					if(!err){
 						var returnChamados = [];
 						chamados.forEach(function(element, index, array){

@@ -33,7 +33,7 @@ chamadoUtilRouter.route('/classificar/:idChamado')
 		});
 
 chamadoUtilRouter.route('/avaliar/:idChamado/:numeroEstrelas')
-		.post(function(req, res){
+		.get(function(req, res){
 			console.log('chegou no avaliar atendimento');
 			ChamadoController.avaliarAtendimento(req.params.idChamado, req.params.numeroEstrelas, req, res);
 		});

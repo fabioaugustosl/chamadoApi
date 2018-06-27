@@ -49,7 +49,12 @@ chamadoUtilRouter.route('/atendentesOcupadosPorRegiao/:idEmpresa')
 			console.log('vai listar os atendentes ocupados por região');
 			ChamadoController.listarAtendentesOcupadosPorRegiao(req.params.idEmpresa, req, res);
 		});
-		
+	
+chamadoUtilRouter.route('/xls')
+		.get(function(req, res){
+			console.log('chegou no route de exportar XLS');
+			ChamadoController.exportarChamado(req, res);
+		});	
 
 
 module.exports = chamadoUtilRouter;

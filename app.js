@@ -3,8 +3,8 @@ var bodyParser = require('body-parser');
 //var cookieParser = require('cookie-parser');
 //var session = require('express-session');
 var mongoose = require('mongoose');
+var json2xls = require('json2xls');
 
-//require('./src/models/ItemAtendimentoModel.js');
 
 
 var app = express();
@@ -21,6 +21,7 @@ app.use(express.static('public'));
 //middlaware
 app.use(bodyParser.urlencoded({extended:true}));
 app.use(bodyParser.json());
+app.use(json2xls.middleware); //exportação xls
 
 
 // cors

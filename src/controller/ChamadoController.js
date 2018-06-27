@@ -651,62 +651,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 
 	var listar = function(req, res){
 		console.log(' ::: Listar Chamados');
-		var query = [];
-		//console.log(moment().format()); 	
-		if(req.query){
-			//query = req.query;
-			if(req.query.dataCriacao){
-				query.push({dataCriacao : moment(query.dataCriacao, "DD/MM/YYYY").utc().format()});
-			} 
-			if(req.query.dataFim){
-				query.push({dataFim : moment(query.dataFim, "DD/MM/YYYY").utc().format()});
-			}
-
-			if(req.query.dataCriacaoDe && query.dataCriacaoAte){
-				query.push({
-                    $gte: moment(query.dataCriacaoDe, "DD/MM/YYYY").hour(0).minute(0).second(0).millisecond(0).utc().format(),
-                    $lte: moment(query.dataCriacaoAte, "DD/MM/YYYY").hour(23).minute(59).second(59).millisecond(999).utc().format()
-                });
-			}
-
-			if(req.query.dataFimDe && query.dataFimAte){
-				query.push({
-                    $gte: moment(query.dataFimDe, "DD/MM/YYYY").hour(0).minute(0).second(0).millisecond(0).utc().format(),
-                    $lte: moment(query.dataFimAte, "DD/MM/YYYY").hour(23).minute(59).second(59).millisecond(999).utc().format()
-                });
-			}
-
-
-			if(req.query.idEmpresa){
-				query.push({idEmpresa : req.query.idEmpresa});
-			}
-
-			if(req.query.deletado){
-				query.push({deletado : req.query.deletado});
-			}
-			
-			if(req.query.idCategoria){
-				query.push({idCategoria : req.query.idCategoria});
-			}	
-			
-			if(req.query.idRegiao){
-				query.push({idRegiao : req.query.idRegiao});
-			}	
-
-			if(req.query.idSolicitante){
-				query.push({idSolicitante : req.query.idSolicitante});
-			}
-
-			if(req.query.nomeSolicitante){
-				query.push({nomeSolicitante : RegExp(req.query.nomeSolicitante, "i") });
-			}
-		}
-
-		console.log(query);
-		var queryFinal = {};
-		if(query && query.length > 0){
-			queryFinal = { $and: query };
-		}
+		var queryFinal = montarQueryListar(req);
 
 		chamadoModel.find(queryFinal)
 			.populate('itens').populate('idUnidade') 
@@ -1106,6 +1051,127 @@ var chamadoController = function(chamadoModel, grupoModel){
 
 
 
+	var exportarChamado = function(req, res){
+		console.log(' ::: Exportar Chamados');
+		
+		var queryFinal = montarQueryListar(req);
+
+		chamadoModel.find(queryFinal)
+			.populate('itens').populate('idUnidade') 
+			.exec(function(err, chamados){
+
+				if(err){
+					res.status(500).send(err);
+				} else {
+
+//					codigo,nomeRegiao,nomeSolicitante,cpfSolicitante,nomeAtendente,nomeUnidade,
+//	nomeAgrupamento, nomeCategoria, itens, dataCriacao, dataApoio, dataInicioAtendimento, dataFim,
+//	comentarioEncerramento, minutosAteAtribuicao,minutosDaAtribuicaoAteInicio,
+//	minutosDoInicioAteFinalizacao, avaliacaoAtendimento
+					
+					var returnChamados = [];
+					chamados.forEach(function(element, index, array){
+						
+							var chamadoObj = element.toJSON();
+							
+							var obj = {};
+							obj.codigo = chamadoObj.codigo;
+							obj.regiao = chamadoObj.nomeRegiao;
+							obj.solicitante = chamadoObj.nomeSolicitante;
+							obj.cpfSolicitante = chamadoObj.cpfSolicitante;
+							obj.atendente = chamadoObj.nomeAtendente;
+							obj.sala = chamadoObj.nomeUnidade;
+
+							obj.predio = chamadoObj.nomeAgrupamento;
+							obj.categoria = chamadoObj.nomeCategoria;
+							if(chamadoObj.itens && chamadoObj.itens.length > 0){
+								obj.itemAtendimento = chamadoObj.itens[0].nome;
+							}
+							obj.criadoEm = moment(chamadoObj.dataCriacao).utcOffset('-0300').format("DD/MM/YYYY HH:mm");
+							obj.atribuidoEm = moment(chamadoObj.dataApoio).utcOffset('-0300').format("DD/MM/YYYY HH:mm");
+							obj.inicioAtedimento = moment(chamadoObj.dataInicioAtendimento).utcOffset('-0300').format("DD/MM/YYYY HH:mm");
+							obj.finalizadoEm = moment(chamadoObj.dataFim).utcOffset('-0300').format("DD/MM/YYYY HH:mm");
+
+							obj.comentarioEncerramento = chamadoObj.comentarioEncerramento;
+							obj.minutosAteAtribuicao = chamadoObj.minutosAteAtribuicao;
+							obj.minutosDaAtribuicaoAteInicio = chamadoObj.minutosDaAtribuicaoAteInicio;
+							obj.minutosDoInicioAteFinalizacao = chamadoObj.minutosDoInicioAteFinalizacao;
+							obj.avaliacaoAtendimento = chamadoObj.avaliacaoAtendimento;
+
+							returnChamados.push(obj);
+			
+					});
+
+					res.xls('chamados.xlsx', returnChamados);
+				}
+			});
+	};
+
+
+
+	var montarQueryListar = function(req){
+
+		var query = [];
+		//console.log(moment().format()); 	
+		if(req.query){
+			//query = req.query;
+			if(req.query.dataCriacao){
+				query.push({dataCriacao : moment(query.dataCriacao, "DD/MM/YYYY").utc().format()});
+			} 
+			if(req.query.dataFim){
+				query.push({dataFim : moment(query.dataFim, "DD/MM/YYYY").utc().format()});
+			}
+
+			if(req.query.dataCriacaoDe && query.dataCriacaoAte){
+				query.push({
+                    $gte: moment(query.dataCriacaoDe, "DD/MM/YYYY").hour(0).minute(0).second(0).millisecond(0).utc().format(),
+                    $lte: moment(query.dataCriacaoAte, "DD/MM/YYYY").hour(23).minute(59).second(59).millisecond(999).utc().format()
+                });
+			}
+
+			if(req.query.dataFimDe && query.dataFimAte){
+				query.push({
+                    $gte: moment(query.dataFimDe, "DD/MM/YYYY").hour(0).minute(0).second(0).millisecond(0).utc().format(),
+                    $lte: moment(query.dataFimAte, "DD/MM/YYYY").hour(23).minute(59).second(59).millisecond(999).utc().format()
+                });
+			}
+
+
+			if(req.query.idEmpresa){
+				query.push({idEmpresa : req.query.idEmpresa});
+			}
+
+			if(req.query.deletado){
+				query.push({deletado : req.query.deletado});
+			}
+			
+			if(req.query.idCategoria){
+				query.push({idCategoria : req.query.idCategoria});
+			}	
+			
+			if(req.query.idRegiao){
+				query.push({idRegiao : req.query.idRegiao});
+			}	
+
+			if(req.query.idSolicitante){
+				query.push({idSolicitante : req.query.idSolicitante});
+			}
+
+			if(req.query.nomeSolicitante){
+				query.push({nomeSolicitante : RegExp(req.query.nomeSolicitante, "i") });
+			}
+		}
+
+		console.log(query);
+		var queryFinal = {};
+		if(query && query.length > 0){
+			queryFinal = { $and: query };
+		}
+		return queryFinal;
+	}
+
+
+
 
 	return {
 		listarTotaisChamadosDia : listarTotaisChamadosDia,
@@ -1122,6 +1188,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 		finalizarAtendimento : finalizarAtendimento,
 		iniciarAtendimento : iniciarAtendimento,
 		pegarAtendimento : pegarAtendimento,
+		exportarChamado : exportarChamado,
 		atualizar 	: atualizar,
 		listar 		: listar,
 		remover 	: remover,

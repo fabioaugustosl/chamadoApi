@@ -8,6 +8,7 @@ var ChamadoController = require('../controller/ChamadoController')(ChamadoModel)
 
 
 
+
 chamadoUtilRouter.route('/pegar/:idChamado/:idAtendente/:nomeAtendente/:previsaoEmMinutos')
 		.post(function(req, res){
 			console.log('chegou no iniciar atendimento');

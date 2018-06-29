@@ -74,7 +74,5 @@ chamadoUtilRouter.route('/qtdChamadosItensPorCategoria/:idCategoria')
 		});	
 
 		
-		
-
-
+	
 module.exports = chamadoUtilRouter;

@@ -17,11 +17,12 @@ var chamadoRelatorioController = function(chamadoModel, grupoModel){
 	    	{
 	           "$match": {
 	                idEmpresa: empresa
+	                //dono: empresa
 	            }
         	},
 			{ 
 				"$group": { 
-			       	_id: "$nomeCategoria",
+			       	_id: {nome: "$nomeCategoria", id: "$idCategoria"},
 			       	total: { $sum: 1 } 
 				}
 			}
@@ -67,7 +68,7 @@ var chamadoRelatorioController = function(chamadoModel, grupoModel){
 				for (chaveArray in returnChamados){
 					let total = returnChamados[chaveArray];
 					let c = {};
-					c.categoria = chaveArray;
+					c.item = chaveArray;
 					c.total = total;
 					retorno.push(c);
 				}

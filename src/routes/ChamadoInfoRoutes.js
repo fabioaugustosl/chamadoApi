@@ -72,6 +72,18 @@ chamadoUtilRouter.route('/qtdChamadosItensPorCategoria/:idCategoria')
 			console.log('chegou no route de qtdChamadosItensPorCategoria');
 			ChamadoRelatorioController.listarResumoItensAtendimentosPorCategoria(req.params.idCategoria, req, res);
 		});	
+		
+chamadoUtilRouter.route('/qtdChamadosPorSolicitante/:idEmpresa')
+		.get(function(req, res){
+			console.log('chegou no route de qtdChamadosPorSolicitante');
+			ChamadoRelatorioController.listarResumoQtdPorSolicitante(req.params.idEmpresa, req, res);
+		});	
+
+chamadoUtilRouter.route('/qtdChamadosPorAtendente/:idEmpresa')
+		.get(function(req, res){
+			console.log('chegou no route de qtdChamadosPorAtendente');
+			ChamadoRelatorioController.listarResumoQtdPorAtendente(req.params.idEmpresa, req, res);
+		});	
 
 		
 	

@@ -16,8 +16,8 @@ var chamadoRelatorioController = function(chamadoModel, grupoModel){
 	    [	
 	    	{
 	           "$match": {
-	                idEmpresa: empresa
-	                //dono: empresa
+	                //idEmpresa: empresa
+	                dono: empresa
 	            }
         	},
 			{ 
@@ -44,6 +44,7 @@ var chamadoRelatorioController = function(chamadoModel, grupoModel){
 		.limit(200)
   		.sort({ dataCriacao: -1 })
 		.exec(function(err, chamados){
+			console.log('chamados retorno itens : ',chamados);
 			if(err){
 				res.status(500).send(err);
 			} else {
@@ -60,7 +61,7 @@ var chamadoRelatorioController = function(chamadoModel, grupoModel){
 						cont++;
 						returnChamados[itemObj.nome] = cont;
 					});
-					returnChamados['fabio'] = 1;
+					console.log(' return chamados: ',returnChamados);
 				});
 
 				var retorno = [];
@@ -79,7 +80,59 @@ var chamadoRelatorioController = function(chamadoModel, grupoModel){
 	};
 
 
-	
+
+	var listarResumoQtdPorSolicitante = function(empresa, req, res){
+		console.log('entrou na listarResumoQtdPorSolicitante - id empresa / dono: ',empresa);
+		chamadoModel.aggregate(
+		    [	
+		    	{
+		           "$match": {
+		                //idEmpresa: empresa
+		                dono: empresa
+		            }
+	        	},
+				{ 
+					"$group": { 
+				       	_id: {nome: "$nomeSolicitante"},
+				       	total: { $sum: 1 } 
+					}
+				}
+		    ],
+		    function(err,result) {
+		    	//console.log(result);
+		    	res.status(201);
+				res.send(result);
+		    }
+		);
+	};
+
+
+
+	var listarResumoQtdPorAtendente = function(empresa, req, res){
+		console.log('entrou na listarResumoQtdPorAtendente - id empresa / dono: ',empresa);
+		chamadoModel.aggregate(
+		    [	
+		    	{
+		           "$match": {
+		                //idEmpresa: empresa
+		                dono: empresa
+		            }
+	        	},
+				{ 
+					"$group": { 
+				       	_id: {nome: "$nomeAtendente"},
+				       	total: { $sum: 1 } 
+					}
+				}
+		    ],
+		    function(err,result) {
+		    	//console.log(result);
+		    	res.status(201);
+				res.send(result);
+		    }
+		);
+	};
+
 
 
 	
@@ -410,6 +463,8 @@ var chamadoRelatorioController = function(chamadoModel, grupoModel){
 		listarResumoQtdChamadosUltimos : listarResumoQtdChamadosUltimos,
 		listarResumoMediaAvaliacoesChamados : listarResumoMediaAvaliacoesChamados,
 		listarAtendentesOcupadosPorRegiao :listarAtendentesOcupadosPorRegiao,
+		listarResumoQtdPorAtendente : listarResumoQtdPorAtendente,
+		listarResumoQtdPorSolicitante : listarResumoQtdPorSolicitante,
 		exportarChamado : exportarChamado
 	};
 

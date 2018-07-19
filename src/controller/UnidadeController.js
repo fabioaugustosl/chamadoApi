@@ -120,7 +120,7 @@ var unidadeController = function(unidadeModel){
 			queryFinal = { $and: query };
 		}
 		
-		apoioModel.find(queryFinal)
+		unidadeModel.find(queryFinal)
 			.exec(function(err, unidades){
 			if(err){
 				res.status(500).send(err);

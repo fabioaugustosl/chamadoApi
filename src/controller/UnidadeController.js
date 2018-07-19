@@ -89,8 +89,39 @@ var unidadeController = function(unidadeModel){
 
 	var listar = function(req, res){
 		console.log(' ::: Listar unidade');
+
+		var query = [];
+
+		if(req.query){
+			if(req.query.dono){
+				query.push({dono : req.query.dono});
+			}
+
+			if(req.query.codigo){
+				query.push({codigo : req.query.codigo});
+			}
+
+			if(req.query.nome){
+				query.push({nome : RegExp(req.query.nome, "i") });
+			}
+
+			if(req.query.idAgrupamento){
+				query.push({idAgrupamento : req.query.idAgrupamento});
+			}
+
+			if(req.query.andar){
+				query.push({andar : req.query.andar});
+			}
+		}
+		 
+		console.log(query);
+		var queryFinal = {};
+		if(query && query.length > 0){
+			queryFinal = { $and: query };
+		}
 		
-		unidadeModel.find(req.query, function(err, unidades){
+		apoioModel.find(queryFinal)
+			.exec(function(err, unidades){
 			if(err){
 				res.status(500).send(err);
 			} else {

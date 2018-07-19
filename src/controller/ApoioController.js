@@ -109,6 +109,10 @@ var apoioController = function(apoioModel){
 				query.push({email : RegExp(req.query.email, "i") });
 			}
 
+			if(req.query.empresa){
+				query.push({empresa : {_id : req.query.empresa} });
+			}
+
 		}
 		 
 		console.log(query);

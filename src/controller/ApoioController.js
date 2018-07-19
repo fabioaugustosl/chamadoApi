@@ -89,6 +89,10 @@ var apoioController = function(apoioModel){
 
 		if(req.query){
 
+			if(req.query.dono){
+				query.push({dono : req.query.dono});
+			}
+
 			if(req.query.nome){
 				query.push({nome : RegExp(req.query.nome, "i") });
 			}

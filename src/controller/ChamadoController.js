@@ -225,6 +225,16 @@ var chamadoController = function(chamadoModel, grupoModel){
 						// na regiao de backup. caso exista atendente livre o chamado eh aberto para a regiao de backup
 						listarQtdChamadosEmAndamentoDaRegiao(regiao[0]._id).then(function(totalChamadosDestaRegiao){
 							if(regiao[0].idRegiaoBackup && totalChamadosDestaRegiao > 0 && totalChamadosDestaRegiao >= regiao[0].apoios.length){
+
+								// antes de verificar a região de backup vai mandar msg pro professor avisando q pode demorar um pouco
+								var notif = new NotificacaoModel();
+								notif.dono = chamado.dono;
+								notif.idPessoa = regiao.apoios[i]._id;
+								notif.idChamado = chamado._id;
+								notif.msg = "Olá "+chamado.nomeSolicitante+". No momento todos os atendentes estão ocupados. Vamos tentar atendê-lo(a) assim que possível.";
+
+								NotificacaoController.salvarNovoSimples(notif);
+
 								console.log("Entrou na parada para recuperar o chamado de backup ",regiao[0].idRegiaoBackup);
 								recuperarRegiaoBackupPorId(regiao[0].idRegiaoBackup).then(function(regiaoBackup){
 									console.log('regiao de backup recuperada : ', regiaoBackup);
@@ -751,6 +761,9 @@ var chamadoController = function(chamadoModel, grupoModel){
 				chamados.forEach(function(element, index, array){
 					var chamadoObj = element.toJSON();
 					chamadoObj.status = classificadorStatus(chamadoObj);
+					if(!chamadoObj.nomeAtendente){
+						chamadoObj.nomeAtendente = "";
+					}
 					returnChamados.push(chamadoObj);
 				});
 

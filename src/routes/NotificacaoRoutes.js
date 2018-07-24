@@ -14,12 +14,16 @@ notificacaoRouter.route('/')
 			NotificacaoController.listar(req, res);
 		});
 
+notificacaoRouter.route('/porChamado/:idChamado')
+		.post(function(req, res){
+			NotificacaoController.salvarPorChamado(req.params.idChamado, req, res);
+		});
+
 
 notificacaoRouter.route('/ler/:notificacaoId')
 		.get(function(req, res){
 			NotificacaoController.registrarLeituraNotificacao(req.params.notificacaoId, req, res);
 		});
-
 
 
 notificacaoRouter.route('/:notificacaoId')

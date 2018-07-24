@@ -1,5 +1,9 @@
 	
 var moment = require('moment');
+var Promise = require('promise');
+var q = require('q');
+
+var ChamadoModel = require('../models/ChamadoModel');
 
 var notificacaoController = function(notificacaoModel){
 
@@ -23,6 +27,70 @@ var notificacaoController = function(notificacaoModel){
 			}
 			notificacao.save();
 			return true;
+		}
+
+	};
+
+
+	var salvarPorChamado = function(idChamado, req, res){
+		//console.log('chegou no salvar por chamado >', idChamado);
+
+		var recuperarChamado = function(idChamado) {
+			//console.log('vai recuperr o chamado ',idChamado);
+		  	var deferred = q.defer();
+
+		   	ChamadoModel.findById(idChamado)
+		   	.exec(function(err, chamado){
+		   		//console.log('chegou no log do promise de recuperar a rchamado: ', chamado);
+				if(err){
+					res.status(500).send(err);
+				} else {
+					deferred.resolve(chamado);
+				}
+			});
+
+		  	return deferred.promise;
+		};
+
+		var msgObrigatorio = '';
+		// CAMPOS OBRIGATORIOS: dono, idSolicitante, idCategoria, idUnidade
+		if(!req.body.dono) {
+			msgObrigatorio+= 'Dono é obrigatório.<br/>';
+		}
+		
+		if(!req.body.msg) {
+			msgObrigatorio+= 'Mensagem é obrigatória.<br/>';
+		}
+
+		if(msgObrigatorio != '') {
+			res.status(400);
+			res.send(msgObrigatorio);
+		} else {
+
+			recuperarChamado(idChamado).then(function(chamado){
+				var notificacao = new notificacaoModel(req.body);
+				notificacao.idPessoa = chamado.idSolicitante;
+				notificacao.idChamado = chamado._id;
+			
+				//console.log('Vai salvar essa notificacao: ',notificacao);
+			
+				notificacao.dataCriacao = moment().second(0).millisecond(0).utc().format();
+
+				notificacao.lido = false;
+				
+				if(!notificacao.tipo){
+					notificacao.tipo = "NOTIFICACAO_SIMPLES";
+				}
+
+				notificacao.save(function(err){
+					if(err){
+						res.status(500).send(err);
+					} else {
+						res.status(201).send("OK");
+					}
+				});
+
+			});
 		}
 
 	};
@@ -135,7 +203,8 @@ var notificacaoController = function(notificacaoModel){
 		listar 		: listar,
 		remover 	: remover,
 		salvarNovo 	: salvarNovo,
-		salvarNovoSimples : salvarNovoSimples
+		salvarNovoSimples : salvarNovoSimples,
+		salvarPorChamado : salvarPorChamado
 	};
 
 };

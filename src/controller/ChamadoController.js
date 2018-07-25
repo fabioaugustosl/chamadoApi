@@ -731,6 +731,39 @@ var chamadoController = function(chamadoModel, grupoModel){
 	};
 
 
+
+
+	var listarQtdChamadosFechadosPorSolicitanteSemClassificacao = function(idSolicit, req, res){
+		console.log(' ::: Listar Chamados listarQtdChamadosFechadosPorSolicitanteSemClassificacao');
+		var query = [];
+		
+		query.push({idSolicitante : idSolicit});
+		query.push({deletado : false});
+		query.push({dataFim :  { $ne: null }});
+		query.push({avaliacaoAtendimento :  { $eq: null }});
+		
+		var queryFinal = {};
+		if(query && query.length > 0){
+			queryFinal = { $and: query };
+		}
+
+		console.log(queryFinal);
+
+		chamadoModel.find(queryFinal)
+			.count(function (err, count) {
+				if(err){
+					res.res.sendStatus(500).send(err);
+				} else {
+					console.log(count);
+					res.send(count+'');
+				}
+			});
+
+	};
+
+
+
+
 	var listarChamadosAbertos = function(donoParam, idEmpresa, req, res){
 		console.log(' ::: Listar Chamados abertos por dono/empresa');
 		var query = [];
@@ -938,6 +971,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 		listarChamadoEmAtendimento : listarChamadoEmAtendimento,
 		listarChamadosPorSolicitante : listarChamadosPorSolicitante,
 		classificarAtendimento : classificarAtendimento,
+		listarQtdChamadosFechadosPorSolicitanteSemClassificacao : listarQtdChamadosFechadosPorSolicitanteSemClassificacao,
 		avaliarAtendimento : avaliarAtendimento,
 		finalizarAtendimento : finalizarAtendimento,
 		iniciarAtendimento : iniciarAtendimento,

@@ -57,6 +57,14 @@ chamadoUtilRouter.route('/fechados/:idSolicitante')
 			ChamadoController.listarChamadosPorSolicitante(req.params.idSolicitante, 0, req, res);
 		});
 
+chamadoUtilRouter.route('/qtdFechadosSemClassificacao/:idSolicitante')
+		.get(function(req, res){
+			console.log('chegou listar qtd chamados fechados ');
+			ChamadoController.listarQtdChamadosFechadosPorSolicitanteSemClassificacao(req.params.idSolicitante,  req, res);
+		});
+
+		
+
 chamadoUtilRouter.route('/abertosPorRegiao/:idAtendente')
 		.get(function(req, res){
 			console.log('chegou listar chamados abertoa por regiao do atendente');

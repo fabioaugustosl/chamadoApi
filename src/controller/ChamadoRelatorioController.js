@@ -52,15 +52,18 @@ var chamadoRelatorioController = function(chamadoModel, grupoModel){
 				
 				chamados.forEach(function(element, index, array){
 					var chamadoObj = element.toJSON();
-					chamadoObj.itens.forEach(function(e, i, a){
-						var itemObj = e.toJSON();
-						let cont = returnChamados[itemObj.nome];
-						if(!cont){
-							cont = 0;
-						}
-						cont++;
-						returnChamados[itemObj.nome] = cont;
-					});
+					if(chamadoObj.itens && chamadoObj.itens.length > 0){
+						chamadoObj.itens.forEach(function(e, i, a){
+							var itemObj = e.toJSON();
+							let cont = returnChamados[itemObj.nome];
+							if(!cont){
+								cont = 0;
+							}
+							cont++;
+							returnChamados[itemObj.nome] = cont;
+						});
+					}
+					
 					console.log(' return chamados: ',returnChamados);
 				});
 

@@ -566,10 +566,10 @@ var chamadoController = function(chamadoModel, grupoModel){
 	};
 
 
-	var finalizarAtendimento = function(idChamado, req, res){
+	var finalizarAtendimento = function(idChamadoFinalizar, req, res){
 		console.log(' ::: Finalizar atendimento chamado ');
 
-		chamadoModel.findById(idChamado, function(err, chamado){
+		chamadoModel.findById(idChamadoFinalizar, function(err, chamado){
 			if(err){
 				res.status(500).send(err);
 			} else if(chamado) {
@@ -587,19 +587,38 @@ var chamadoController = function(chamadoModel, grupoModel){
 							res.status(500).send(err);
 						} else {
 
-						// 	salva notificação para o solicitante saber que o chamado foi fechado.
-							var notif = new NotificacaoModel();
-							notif.dono = chamado.dono;
-							if(chamado.idSolicitante){
-								notif.idPessoa = chamado.idSolicitante;	
-							} else {
-								notif.idPessoa = chamado.cpfSolicitante;
-							}
-							
-							notif.idChamado = chamado._id;
-							notif.msg = "Olá "+chamado.nomeSolicitante+". O chamado "+chamado.codigo+" foi fechado pelo atendente. Acesse a listagem de chamdos encerrados e avalie o atendimento.";
+							// vai buscar as notificações existentes não lidas
+							var query = [];
+							query.push({lido : {$ne: true }});
+							query.push({idChamado :  chamado._id});
+							var queryFinal = { $and: query };
 
-							NotificacaoController.salvarNovoSimples(notif);
+							NotificacaoModel.find(queryFinal).exec(function(err, notificacoes){
+								console.log('callback notificações não lidas ');
+								if(!err && notificacoes){
+									notificacoes.forEach(function(element, index, array){
+										var notificacaoObj = element.toJSON();
+										// salvar notificação
+										notificacaoObj.dataLeitura = moment().second(0).millisecond(0).utc().format();
+										notificacaoObj.lido = true;
+										notificacaoObj.save(function(err){	});
+									});
+								}
+								console.log('vai salvar a notificação avisando que o chamado foi fechado');
+								// 	salva notificação para o solicitante saber que o chamado foi fechado.
+								var notif = new NotificacaoModel();
+								notif.dono = chamado.dono;
+								if(chamado.idSolicitante){
+									notif.idPessoa = chamado.idSolicitante;	
+								} else {
+									notif.idPessoa = chamado.cpfSolicitante;
+								}
+								
+								notif.idChamado = chamado._id;
+								notif.msg = "Olá "+chamado.nomeSolicitante+". O chamado "+chamado.codigo+" foi fechado pelo atendente. Acesse a listagem de chamdos encerrados e avalie o atendimento.";
+
+								NotificacaoController.salvarNovoSimples(notif);
+							});
 
 							console.log('vai retornar 201 - chamado finalizado');
 							res.status(201).send("OK");

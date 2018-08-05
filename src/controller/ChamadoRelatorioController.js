@@ -54,7 +54,8 @@ var chamadoRelatorioController = function(chamadoModel, grupoModel){
 					var chamadoObj = element.toJSON();
 					if(chamadoObj.itens && chamadoObj.itens.length > 0){
 						chamadoObj.itens.forEach(function(e, i, a){
-							var itemObj = e.toJSON();
+							console.log(e);
+							var itemObj = e ; //e.toJSON();
 							let cont = returnChamados[itemObj.nome];
 							if(!cont){
 								cont = 0;

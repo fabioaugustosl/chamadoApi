@@ -5,10 +5,10 @@ var moment = require('moment');
 var autorizadoController = function(autorizadoModel){
 
 	var salvarNovo = function(req, res){
-		console.log(' ::: Salvar Novo Solicitante Autorizado ');
+		//console.log(' ::: Salvar Novo Solicitante Autorizado ');
 		var autorizado = new autorizadoModel(req.body);
 		
-		console.log(autorizado);
+		//console.log(autorizado);
 		var msgObrigatorio = '';
 		// CAMPOS OBRIGATORIOS: dono, idSolicitante, codigo, idUnidade
 		if(!req.body.dono) {
@@ -43,7 +43,7 @@ var autorizadoController = function(autorizadoModel){
 
 
 	var remover = function(req, res){
-		console.log(' ::: Remover autorizado');
+		//console.log(' ::: Remover autorizado');
 		req.autorizado.remove(function(err){
 			if(err){
 				res.status(500).send(err);
@@ -57,7 +57,7 @@ var autorizadoController = function(autorizadoModel){
 
 
 	var atualizar = function(req, res){
-		console.log(' ::: Atualizar solicitante autorizado');
+		//console.log(' ::: Atualizar solicitante autorizado');
 		if(req.body._id){
 			delete req.body._id;
 		}
@@ -66,7 +66,7 @@ var autorizadoController = function(autorizadoModel){
 			req.autorizado[p] = req.body[p];	
 		}
 		
-		console.log(req.autorizado);
+		//console.log(req.autorizado);
 		req.autorizado.save(function(err){
 			if(err){
 				res.status(500).send(err);
@@ -78,7 +78,7 @@ var autorizadoController = function(autorizadoModel){
 
 
 	var listar = function(req, res){
-		console.log(' ::: Listar solicitante autorizado');
+		//console.log(' ::: Listar solicitante autorizado');
 
 		var query = [];
 		if(req.query){
@@ -104,7 +104,7 @@ var autorizadoController = function(autorizadoModel){
 			}
 		}
 
-		console.log(query);
+		//console.log(query);
 		var queryFinal = {};
 		if(query && query.length > 0){
 			queryFinal = { $and: query };
@@ -124,7 +124,7 @@ var autorizadoController = function(autorizadoModel){
 
 
 	var autenticar = function(cpfDigitado, req, res){
-		console.log('cpfDigitado: ',cpfDigitado);
+		//console.log('cpfDigitado: ',cpfDigitado);
 		if(!cpfDigitado){
 			res.status(500).send("Cpf inválido");
 		} else {

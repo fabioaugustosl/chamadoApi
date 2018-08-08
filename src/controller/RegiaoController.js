@@ -6,10 +6,10 @@ var q = require('q');
 var regiaoController = function(regiaoModel, unidadeModel){
 
 	var salvarNovo = function(req, res){
-		console.log(' ::: Salvar Nova Região');
+		//console.log(' ::: Salvar Nova Região');
 		var regiao = new regiaoModel(req.body);
 		
-		console.log(regiao);
+		//console.log(regiao);
 		var msgObrigatorio = '';
 
 		if(!req.body.dono) {
@@ -41,7 +41,7 @@ var regiaoController = function(regiaoModel, unidadeModel){
 			  	query.push({dono : regiao.dono});
 
 			  	regiaoModel.where({ $and: query }).count(function (err, count) {
-					console.log('callback do VALIDACAO count Regiao por nome e idEmpresa :', count );
+					//console.log('callback do VALIDACAO count Regiao por nome e idEmpresa :', count );
 					if(!err){
 				  		deferred.resolve(count);
 					}
@@ -61,7 +61,7 @@ var regiaoController = function(regiaoModel, unidadeModel){
 			validarRegiaoMesmoNome().then(function(total) {
  				//console.log('recuperou o total por pessoa');
  				if(total > 0){
-					console.log("ERRO: A "+regiao.nome+" já existe para esse empresa.");
+					//console.log("ERRO: A "+regiao.nome+" já existe para esse empresa.");
 					res.status(403);
 					res.end('Já existe uma região com o nome '+regiao.nome+' para a empresa informada.');
 				} else {
@@ -76,7 +76,7 @@ var regiaoController = function(regiaoModel, unidadeModel){
 
 
 	var atualizar = function(req, res){
-		console.log(' ::: Atualizar regiao ');
+		//console.log(' ::: Atualizar regiao ');
 		delete req.body.__v;
 		if(req.body._id){
 			delete req.body._id;
@@ -86,13 +86,13 @@ var regiaoController = function(regiaoModel, unidadeModel){
 			req.regiao[p] = req.body[p];	
 		}
 		
-		console.log(req.regiao);
+		//console.log(req.regiao);
 		req.regiao.save(function(err){
 			console.log('call back atualizacao regiao');
 			if(err){
 				res.status(500).send(err);
 			} else {
-				console.log('vai retornar 201 - atualizacao regiao');
+				//console.log('vai retornar 201 - atualizacao regiao');
 				res.status(201).send();
 			}
 		});
@@ -100,7 +100,7 @@ var regiaoController = function(regiaoModel, unidadeModel){
 
 
 	var adicionarUnidade = function(idRegiao,req, res){
-		console.log(' ::: Adicionar  nova unidade');
+		//console.log(' ::: Adicionar  nova unidade');
 
 		var unidade = new unidadeModel();
 
@@ -133,7 +133,7 @@ var regiaoController = function(regiaoModel, unidadeModel){
 
 
 	var remover = function(req, res){
-		console.log(' ::: Remover regiao');
+		//console.log(' ::: Remover regiao');
 
 		req.regiao.remove(function(err){
 			if(err){

@@ -4,10 +4,10 @@ var moment = require('moment');
 var apoioController = function(apoioModel){
 
 	var salvarNovo = function(req, res){
-		console.log(' ::: Salvar Novo Apoio ');
+		//console.log(' ::: Salvar Novo Apoio ');
 		var apoio = new apoioModel(req.body);
 		
-		console.log(apoio);
+		//console.log(apoio);
 		var msgObrigatorio = '';
 
 		if(!req.body.dono) {
@@ -41,7 +41,7 @@ var apoioController = function(apoioModel){
 
 
 	var remover = function(req, res){
-		console.log(' ::: Remover apoio');
+		//console.log(' ::: Remover apoio');
 		req.apoio.remove(function(err){
 			if(err){
 				res.status(500).send(err);
@@ -55,7 +55,7 @@ var apoioController = function(apoioModel){
 
 
 	var atualizar = function(req, res){
-		console.log(' ::: Atualizar apoio');
+		//console.log(' ::: Atualizar apoio');
 		delete req.body.__v;
 		if(req.body._id){
 			delete req.body._id;
@@ -71,7 +71,7 @@ var apoioController = function(apoioModel){
 			
 		}
 		
-		console.log(req.apoio);
+		//console.log(req.apoio);
 		req.apoio.save(function(err){
 			if(err){
 				res.status(500).send(err);
@@ -83,7 +83,7 @@ var apoioController = function(apoioModel){
 
 
 	var listar = function(req, res){
-		console.log(' ::: Listar apoio');
+		//console.log(' ::: Listar apoio');
 
 		var query = [];
 
@@ -115,7 +115,7 @@ var apoioController = function(apoioModel){
 
 		}
 		 
-		console.log(query);
+		//console.log(query);
 		var queryFinal = {};
 		if(query && query.length > 0){
 			queryFinal = { $and: query };

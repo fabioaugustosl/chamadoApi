@@ -7,10 +7,10 @@ var q = require('q');
 var itemController = function(itemAtendimentoModel){
 
 	var salvarNovo = function(req, res){
-		console.log(' ::: Salvar Nova item ');
+		//console.log(' ::: Salvar Nova item ');
 		var item = new itemAtendimentoModel(req.body);
 		
-		console.log(item);
+		//console.log(item);
 		var msgObrigatorio = '';
 		
 		if(!req.body.dono) {
@@ -44,7 +44,7 @@ var itemController = function(itemAtendimentoModel){
 			  	query.push({dono : item.dono});
 
 			  	itemAtendimentoModel.where({ $and: query }).count(function (err, count) {
-					console.log('callback do VALIDACAO count item por nome :', count );
+					//console.log('callback do VALIDACAO count item por nome :', count );
 					if(!err){
 				  		deferred.resolve(count);
 					}
@@ -63,7 +63,7 @@ var itemController = function(itemAtendimentoModel){
 			validarItemMesmoNome().then(function(total) {
  				//console.log('recuperou o total por pessoa');
  				if(total > 0){
-					console.log("ERRO: Item "+item.nome+" já existe.");
+					//console.log("ERRO: Item "+item.nome+" já existe.");
 					res.status(403);
 					res.end('Já existe uma item com o nome '+item.nome+'.');
 				} else {
@@ -78,7 +78,7 @@ var itemController = function(itemAtendimentoModel){
 
 
 	var remover = function(req, res){
-		console.log(' ::: Remover item');
+		//console.log(' ::: Remover item');
 		req.item.remove(function(err){
 			if(err){
 				res.status(500).send(err);
@@ -91,7 +91,7 @@ var itemController = function(itemAtendimentoModel){
 
 
 	var atualizar = function(req, res){
-		console.log(' ::: Atualizar item');
+		//console.log(' ::: Atualizar item');
 		if(req.body._id){
 			delete req.body._id;
 		}
@@ -100,7 +100,7 @@ var itemController = function(itemAtendimentoModel){
 			req.item[p] = req.body[p];	
 		}
 		
-		console.log(req.item);
+		//console.log(req.item);
 		req.item.save(function(err){
 			if(err){
 				res.status(500).send(err);
@@ -112,7 +112,7 @@ var itemController = function(itemAtendimentoModel){
 
 
 	var listar = function(req, res){
-		console.log(' ::: Listar item');
+		//console.log(' ::: Listar item');
 		
 		itemAtendimentoModel.find(req.query, function(err, items){
 			if(err){

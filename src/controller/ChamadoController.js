@@ -17,7 +17,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 		console.log(' ::: Salvar Novo ');
 		var chamado = new chamadoModel(req.body);
 		
-		console.log(chamado);
+		//console.log(chamado);
 		var msgObrigatorio = '';
 		// CAMPOS OBRIGATORIOS: dono, idSolicitante, idCategoria, idUnidade
 		if(!req.body.dono) {
@@ -46,7 +46,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 
 			   	chamadoModel.where({ 'dono': chamado.dono , 'idUnidade': chamado.idUnidade, 'idSolicitante': chamado.idSolicitante, 'deletado': false, 'dataFim': null})
 			   			.count(function (err, count) {
-					console.log('callback do count recuperarChamadoAbertoParaEsseSolicitanteEUnidade :', count );
+					//console.log('callback do count recuperarChamadoAbertoParaEsseSolicitanteEUnidade :', count );
 					if(!err){
 				  		deferred.resolve(count);
 					}
@@ -61,7 +61,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 
 			   	chamadoModel.where({ 'dono': chamado.dono , 'idUnidade': chamado.idUnidade, 'cpfSolicitante': chamado.cpfSolicitante, 'deletado': false, 'dataFim': null})
 			   		.count(function (err, count) {
-						console.log('callback do count recuperarChamadoAbertoParaEsseSolicitanteAutorizadoEUnidade :', count );
+						//console.log('callback do count recuperarChamadoAbertoParaEsseSolicitanteAutorizadoEUnidade :', count );
 						if(!err){
 					  		deferred.resolve(count);
 						}
@@ -80,7 +80,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 
 			   	SolicitanteAutorizadoModel.find(query)
 			   		.exec(function (err, solicitante) {
-						console.log('callback do validarSolicitanteAutorizado :', solicitante );
+						//console.log('callback do validarSolicitanteAutorizado :', solicitante );
 						if(!err && solicitante){
 					  		deferred.resolve(solicitante);
 						} 
@@ -181,7 +181,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 					.exec(function(err, regiao){
 						if(!err){
 							if(regiao.apoios){
-								console.log('Apoios que serão notificados : ',regiao.apoios);
+								//console.log('Apoios que serão notificados : ',regiao.apoios);
 								for(var i = 0 ; i< regiao.apoios.length ; i++){
 									var notif = new NotificacaoModel();
 									notif.dono = chamado.dono;
@@ -235,7 +235,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 
 								NotificacaoController.salvarNovoSimples(notif);
 
-								console.log("Entrou na parada para recuperar o chamado de backup ",regiao[0].idRegiaoBackup);
+								//console.log("Entrou na parada para recuperar o chamado de backup ",regiao[0].idRegiaoBackup);
 								recuperarRegiaoBackupPorId(regiao[0].idRegiaoBackup).then(function(regiaoBackup){
 									console.log('regiao de backup recuperada : ', regiaoBackup);
 									if(regiaoBackup){
@@ -275,7 +275,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 			// INICIAR o processo de validação e abertura do chamado
 			if(chamado.cpfSolicitante){
 				// SE FOR UM CHAMADO DE UM ALGUEM AUTORIZADO
-				console.log("INFO : VAI ABRI UM CHAMADO PARA UM SOLICITANTE AUTORIZADO");
+				//console.log("INFO : VAI ABRI UM CHAMADO PARA UM SOLICITANTE AUTORIZADO");
 				
 				validarSolicitanteAutorizado().then(function(solicitante){
 					if(solicitante) {
@@ -300,7 +300,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 			} else { 
 				
 				// SE FOR UM CHAMADO DE UM PROFESSOR CADASTRADO
-				console.log("INFO : VAI ABRI UM CHAMADO PARA UM PROFESSOR LOGADO");
+				//console.log("INFO : VAI ABRI UM CHAMADO PARA UM PROFESSOR LOGADO");
 				recuperarChamadoAbertoParaEsseSolicitanteEUnidade().then(function(total) {
 					if(!total || total == 0){
 						validarRegiaoEAbrirChamado();
@@ -317,7 +317,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 
 
 	var atualizar = function(req, res){
-		console.log(' ::: Atualizar chamado ');
+		//console.log(' ::: Atualizar chamado ');
 		if(req.body._id){
 			delete req.body._id;
 		}
@@ -326,7 +326,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 			req.chamado[p] = req.body[p];	
 		}
 		
-		console.log(req.chamado);
+		//console.log(req.chamado);
 		req.chamado.save(function(err){
 			console.log('call back atualizacao chamado');
 			if(err){
@@ -342,22 +342,22 @@ var chamadoController = function(chamadoModel, grupoModel){
 	// esse metodo se chamava AVALIAR.. agora se chama classificar. É usado para que o apoio classifique o
 	// chamado após finalizar
 	var classificarAtendimento = function(idChamado, req, res){
-		console.log(' ::: classificar chamado ');
+		//console.log(' ::: classificar chamado ');
 		if(req.body._id){
 			delete req.body._id;
 		}
 
-		console.log("idCategoria : ",req.body.idCategoria);
-		console.log("nomeCategoria : ",req.body.nomeCategoria);
-		console.log('item: ',req.body.idItem);
-		console.log('comentarioEncerramento: ',req.body.comentarioEncerramento);
+		//console.log("idCategoria : ",req.body.idCategoria);
+		//console.log("nomeCategoria : ",req.body.nomeCategoria);
+		//console.log('item: ',req.body.idItem);
+		//console.log('comentarioEncerramento: ',req.body.comentarioEncerramento);
 
 		if(!req.body.idItem){
 			res.status(403).end("É necessário informa um item para completar a classificação");
 		} else {
 
 			chamadoModel.findById(idChamado, function(err, chamado){
-				console.log("vai classificar esse chamado", chamado);
+				//console.log("vai classificar esse chamado", chamado);
 				if(err){
 					res.status(500).send(err);
 				} else if(chamado) {
@@ -370,15 +370,15 @@ var chamadoController = function(chamadoModel, grupoModel){
 						chamado.nomeCategoria = req.body.nomeCategoria;	
 					}
 
-					console.log('item: ',req.body.idItem);
+					//console.log('item: ',req.body.idItem);
 					chamado.itens = [req.body.idItem];	
 					
 					chamado.save(function(err){
-						console.log('call back atualizacao chamado');
+						//console.log('call back atualizacao chamado');
 						if(err){
 							res.status(500).send(err);
 						} else {
-							console.log('vai retornar 201 - avaliado chamado');
+							//console.log('vai retornar 201 - avaliado chamado');
 							res.status(201).send("OK");
 						}
 					});
@@ -394,13 +394,13 @@ var chamadoController = function(chamadoModel, grupoModel){
 
 	// avaliação feita pelo solicitando após a finalização do chamado.
 	var avaliarAtendimento = function(idChamado, numeroEstrelas, req, res){
-		console.log(' ::: avaliar chamado ');
+		//console.log(' ::: avaliar chamado ');
 		if(req.body._id){
 			delete req.body._id;
 		}
 
 		chamadoModel.findById(idChamado, function(err, chamado){
-			console.log("vai avaliar esse chamado", chamado);
+			//console.log("vai avaliar esse chamado", chamado);
 			if(err){
 				res.status(500).send(err);
 			} else if(chamado) {
@@ -409,11 +409,11 @@ var chamadoController = function(chamadoModel, grupoModel){
 					chamado.avaliacaoAtendimento = numeroEstrelas;	
 				
 					chamado.save(function(err){
-						console.log('call back avalicao chamado');
+						//console.log('call back avalicao chamado');
 						if(err){
 							res.status(500).send(err);
 						} else {
-							console.log('vai retornar 201 - avaliado chamado');
+							//console.log('vai retornar 201 - avaliado chamado');
 							res.status(201).send("OK");
 						}
 					});
@@ -426,7 +426,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 
 
 	var pegarAtendimento = function(idChamado, idAtendente, nomeAtendente, previsaoMinutos, req, res){
-		console.log(' ::: pegar atendimento chamado ');
+		//console.log(' ::: pegar atendimento chamado ');
 		if(!idChamado || !idAtendente){
 			res.status(403).end("ID do chamado e ID do atentente são obrigatórios para iniciar um atendimento.");
 		} else {
@@ -434,7 +434,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 				if(err){
 					res.status(500).send(err);
 				} else if(chamado) {
-					console.log(chamado);
+					//console.log(chamado);
 					
 						if(chamado.dataApoio){
 							res.status(403).send('Chamado já está atribuido a um atendente');
@@ -467,7 +467,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 									NotificacaoController.salvarNovoSimples(notif);
 
 									// retorna ok para chamador
-									console.log('vai retornar 201 - chamado em atendimento');
+									//console.log('vai retornar 201 - chamado em atendimento');
 									res.status(201).send("OK");
 								}
 							});
@@ -484,7 +484,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 
 
 	var iniciarAtendimento = function(idChamado, idAtende, req, res){
-		console.log(' ::: Iniciar atendimento chamado ');
+		//console.log(' ::: Iniciar atendimento chamado ');
 		if(!idChamado || !idAtende){
 			res.status(403).end("ID do chamado e ID do atentente são obrigatórios para iniciar um atendimento.");
 		} else {
@@ -505,7 +505,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 			  	chamadoModel.find(queryFinal).count().exec(
 			  		function(err, count){
 					if(!err){
-						console.log('chamados em andamento encontrados para esse pessoa: ',count);
+						//console.log('chamados em andamento encontrados para esse pessoa: ',count);
 				  		deferred.resolve(count);
 					} 
 				});
@@ -537,7 +537,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 										res.status(500).send(err);
 									} else {
 
-										console.log('vai retornar 201 - chamado em atendimento');
+										//console.log('vai retornar 201 - chamado em atendimento');
 										res.status(201).send("OK");
 									}
 								});
@@ -553,7 +553,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 			validarAtendenteJaPussuiChamadoEmAndamento().then(function(total) {
  				//console.log('recuperou o total por pessoa');
  				if(total > 0){
-					console.log("Você já possui um chamado em andamento.");
+					//console.log("Você já possui um chamado em andamento.");
 					res.status(403);
 					res.end('Você já possui um chamado em andamento.');
 				} else {
@@ -567,7 +567,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 
 
 	var finalizarAtendimento = function(idChamadoFinalizar, req, res){
-		console.log(' ::: Finalizar atendimento chamado ');
+		//console.log(' ::: Finalizar atendimento chamado ');
 
 		chamadoModel.findById(idChamadoFinalizar, function(err, chamado){
 			if(err){
@@ -594,7 +594,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 							var queryFinal = { $and: query };
 
 							NotificacaoModel.find(queryFinal).exec(function(err, notificacoes){
-								console.log('callback notificações não lidas ');
+								//console.log('callback notificações não lidas ');
 								if(!err && notificacoes){
 									notificacoes.forEach(function(element, index, array){
 										var notificacaoObj = element.toJSON();
@@ -604,7 +604,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 										notificacaoObj.save(function(err){	});
 									});
 								}
-								console.log('vai salvar a notificação avisando que o chamado foi fechado');
+								//console.log('vai salvar a notificação avisando que o chamado foi fechado');
 								// 	salva notificação para o solicitante saber que o chamado foi fechado.
 								var notif = new NotificacaoModel();
 								notif.dono = chamado.dono;
@@ -615,12 +615,12 @@ var chamadoController = function(chamadoModel, grupoModel){
 								}
 								
 								notif.idChamado = chamado._id;
-								notif.msg = "Olá "+chamado.nomeSolicitante+". O chamado "+chamado.codigo+" foi fechado pelo atendente. Acesse a listagem de chamdos encerrados e avalie o atendimento.";
+								notif.msg = "Olá "+chamado.nomeSolicitante+". O chamado "+chamado.codigo+" foi fechado pelo atendente. Acesse a listagem de chamados encerrados e avalie o atendimento.";
 
 								NotificacaoController.salvarNovoSimples(notif);
 							});
 
-							console.log('vai retornar 201 - chamado finalizado');
+							//console.log('vai retornar 201 - chamado finalizado');
 							res.status(201).send("OK");
 						}
 					});
@@ -649,7 +649,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 
 
 	var removerLogico = function(idChamado, req, res){
-		console.log(' ::: Remover Logico Chamado');
+		//console.log(' ::: Remover Logico Chamado');
 
 		chamadoModel.findById(idChamado, function(err, chamado){
 			if(err){
@@ -664,7 +664,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 						if(err){
 							res.status(500).send(err);
 						} else {
-							console.log('vai retornar 201 - chamado deletado logicamente');
+							//console.log('vai retornar 201 - chamado deletado logicamente');
 							res.status(201).send("OK");
 						}
 					});
@@ -679,11 +679,12 @@ var chamadoController = function(chamadoModel, grupoModel){
 
 
 	var listar = function(req, res){
-		console.log(' ::: Listar Chamados');
+		//console.log(' ::: Listar Chamados');
 		var queryFinal = montarQueryListar(req);
 
 		chamadoModel.find(queryFinal)
 			.populate('itens').populate('idUnidade') 
+			.sort({'dataCriacao': -1}).limit(500)
 			.exec(function(err, chamados){
 
 				if(err){
@@ -709,7 +710,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 	* indAbertos = 0 mostra apenas os fechados
 	*/
 	var listarChamadosPorSolicitante = function(idSolicit, indAbertos, req, res){
-		console.log(' ::: Listar Chamados abertos por solicitante');
+		//console.log(' ::: Listar Chamados abertos por solicitante');
 		var query = [];
 		
 		query.push({idSolicitante : idSolicit});
@@ -726,7 +727,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 			queryFinal = { $and: query };
 		}
 
-		console.log(queryFinal);
+		//console.log(queryFinal);
 
 		chamadoModel.find(queryFinal)
 		.populate("idUnidade").populate("idCategoria")
@@ -753,7 +754,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 
 
 	var listarQtdChamadosFechadosPorSolicitanteSemClassificacao = function(idSolicit, req, res){
-		console.log(' ::: Listar Chamados listarQtdChamadosFechadosPorSolicitanteSemClassificacao');
+		//console.log(' ::: Listar Chamados listarQtdChamadosFechadosPorSolicitanteSemClassificacao');
 		var query = [];
 		
 		query.push({idSolicitante : idSolicit});
@@ -766,7 +767,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 			queryFinal = { $and: query };
 		}
 
-		console.log(queryFinal);
+		//console.log(queryFinal);
 
 		chamadoModel.find(queryFinal)
 			.count(function (err, count) {
@@ -784,7 +785,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 
 
 	var listarChamadosAbertos = function(donoParam, idEmpresa, req, res){
-		console.log(' ::: Listar Chamados abertos por dono/empresa');
+		//console.log(' ::: Listar Chamados abertos por dono/empresa');
 		var query = [];
 		
 		query.push({dono : donoParam});
@@ -800,7 +801,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 			queryFinal = { $and: query };
 		}
 
-		console.log(queryFinal);
+		//console.log(queryFinal);
 
 		chamadoModel.find(queryFinal)
 		.populate("idUnidade")
@@ -828,7 +829,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 
 
 	var listarChamadosAbertosPorRegiaoDoAtendente = function(idAtendente,  req, res){
-		console.log(' ::: Listar Chamados abertos por regiao do atendimento');
+		//console.log(' ::: Listar Chamados abertos por regiao do atendimento');
 
 
 		var recuperarRegiaoDoAtendente = function() {
@@ -854,7 +855,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 					regiaoIn.push(regioes[i]._id);
 				}
 
-				console.log(regiaoIn);
+				//console.log(regiaoIn);
 
 				var query = [];
 		
@@ -867,7 +868,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 				
 				var queryFinal = { $and: query };
 
-				console.log(queryFinal);
+				//console.log(queryFinal);
 
 				chamadoModel.find( queryFinal )
 				.populate("idUnidade")
@@ -875,7 +876,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 					if(err){
 						res.status(500).send(err);
 					} else {
-						console.log(chamados);
+						//console.log(chamados);
 						res.json(chamados);
 					}
 				});
@@ -885,7 +886,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 
 
 	var listarChamadoEmAtendimento = function(idAtende, req, res){
-		console.log(' ::: Listar Chamados abertos em atendimento por atendente');
+		//console.log(' ::: Listar Chamados abertos em atendimento por atendente');
 
 		var query = [];
 
@@ -896,7 +897,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 		
 		var queryFinal = { $and: query };
 
-		console.log(queryFinal);
+		//console.log(queryFinal);
 
 		chamadoModel.find( queryFinal )
 		.populate("idUnidade")
@@ -904,7 +905,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 			if(err){
 				res.status(500).send(err);
 			} else {
-				console.log(chamados);
+				//console.log(chamados);
 				var returnChamados = [];
 				chamados.forEach(function(element, index, array){
 					var chamadoObj = element.toJSON();
@@ -973,7 +974,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 			}
 		}
 
-		console.log(query);
+		//console.log(query);
 		var queryFinal = {};
 		if(query && query.length > 0){
 			queryFinal = { $and: query };

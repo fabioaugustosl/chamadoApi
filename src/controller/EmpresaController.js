@@ -3,10 +3,10 @@ var moment = require('moment');
 var empresaController = function(empresaModel){
 
 	var salvarNovo = function(req, res){
-		console.log(' ::: Salvar Novo Empresa ');
+		//console.log(' ::: Salvar Novo Empresa ');
 		var empresa = new empresaModel(req.body);
 		
-		console.log(empresa);
+		//console.log(empresa);
 		var msgObrigatorio = '';
 		// CAMPOS OBRIGATORIOS: dono, idSolicitante, codigo, idUnidade
 		if(!req.body.dono) {
@@ -32,7 +32,7 @@ var empresaController = function(empresaModel){
 
 
 	var remover = function(req, res){
-		console.log(' ::: Remover empresa');
+		//console.log(' ::: Remover empresa');
 		req.empresa.remove(function(err){
 			if(err){
 				res.status(500).send(err);
@@ -45,7 +45,7 @@ var empresaController = function(empresaModel){
 
 
 	var atualizar = function(req, res){
-		console.log(' ::: Atualizar empresa');
+		//console.log(' ::: Atualizar empresa');
 		if(req.body._id){
 			delete req.body._id;
 		}
@@ -54,7 +54,7 @@ var empresaController = function(empresaModel){
 			req.empresa[p] = req.body[p];	
 		}
 		
-		console.log(req.empresa);
+		//console.log(req.empresa);
 		req.empresa.save(function(err){
 			if(err){
 				res.status(500).send(err);
@@ -66,7 +66,7 @@ var empresaController = function(empresaModel){
 
 
 	var listar = function(req, res){
-		console.log(' ::: Listar empresa');
+		//console.log(' ::: Listar empresa');
 		
 		empresaModel.find(req.query, function(err, empresas){
 			if(err){

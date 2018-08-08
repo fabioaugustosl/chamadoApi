@@ -7,10 +7,10 @@ var q = require('q');
 var categoriaController = function(categoriaModel,itemAtendimentoModel){
 
 	var salvarNovo = function(req, res){
-		console.log(' ::: Salvar Nova Categoria ');
+		//console.log(' ::: Salvar Nova Categoria ');
 		var categoria = new categoriaModel(req.body);
 		
-		console.log(categoria);
+		//console.log(categoria);
 		var msgObrigatorio = '';
 		
 		if(!req.body.dono) {
@@ -40,7 +40,7 @@ var categoriaController = function(categoriaModel,itemAtendimentoModel){
 			  	query.push({dono : categoria.dono});
 			  	
 			  	categoriaModel.where({ $and: query }).count(function (err, count) {
-					console.log('callback do VALIDACAO count Categoria por nome :', count );
+					//console.log('callback do VALIDACAO count Categoria por nome :', count );
 					if(!err){
 				  		deferred.resolve(count);
 					}
@@ -59,7 +59,7 @@ var categoriaController = function(categoriaModel,itemAtendimentoModel){
 			validarCategoriaMesmoNome().then(function(total) {
  				//console.log('recuperou o total por pessoa');
  				if(total > 0){
-					console.log("ERRO: A "+categoria.nome+" já existe.");
+					//console.log("ERRO: A "+categoria.nome+" já existe.");
 					res.status(403);
 					res.end('Já existe uma categoria com o nome '+categoria.nome+'.');
 				} else {
@@ -74,7 +74,7 @@ var categoriaController = function(categoriaModel,itemAtendimentoModel){
 
 
 	var remover = function(req, res){
-		console.log(' ::: Remover categoria');
+		//console.log(' ::: Remover categoria');
 		req.categoria.remove(function(err){
 			if(err){
 				res.status(500).send(err);
@@ -87,7 +87,7 @@ var categoriaController = function(categoriaModel,itemAtendimentoModel){
 
 
 	var atualizar = function(req, res){
-		console.log(' ::: Atualizar categoria');
+		//console.log(' ::: Atualizar categoria');
 		delete req.body.__v;
 		if(req.body._id){
 			delete req.body._id;
@@ -97,7 +97,7 @@ var categoriaController = function(categoriaModel,itemAtendimentoModel){
 			req.categoria[p] = req.body[p];	
 		}
 		
-		console.log(req.categoria);
+		//console.log(req.categoria);
 		req.categoria.save(function(err){
 			if(err){
 				res.status(500).send(err);
@@ -109,7 +109,7 @@ var categoriaController = function(categoriaModel,itemAtendimentoModel){
 
 
 	var adicionarItem = function(idCategoria,req, res){
-		console.log(' ::: Adicionar  novo item');
+		//console.log(' ::: Adicionar  novo item');
 
 		var item = new itemAtendimentoModel(req.body);
 
@@ -141,7 +141,7 @@ var categoriaController = function(categoriaModel,itemAtendimentoModel){
 	};
 
 	var listar = function(req, res){
-		console.log(' ::: Listar categoria');
+		//console.log(' ::: Listar categoria');
 		
 		categoriaModel.find(req.query)
 			.populate('itens')

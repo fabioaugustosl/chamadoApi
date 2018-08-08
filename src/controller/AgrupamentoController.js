@@ -3,10 +3,10 @@ var moment = require('moment');
 var agrupamentoController = function(agrupamentoModel){
 
 	var salvarNovo = function(req, res){
-		console.log(' ::: Salvar Novo Agrupmento ');
+		//console.log(' ::: Salvar Novo Agrupmento ');
 		var agrupamento = new agrupamentoModel(req.body);
 		
-		console.log(agrupamento);
+		//console.log(agrupamento);
 		var msgObrigatorio = '';
 		// CAMPOS OBRIGATORIOS: dono, idSolicitante, codigo, idUnidade
 		if(!req.body.dono) {
@@ -35,7 +35,7 @@ var agrupamentoController = function(agrupamentoModel){
 
 
 	var remover = function(req, res){
-		console.log(' ::: Remover agrupamento');
+		//console.log(' ::: Remover agrupamento');
 		req.agrupamento.remove(function(err){
 			if(err){
 				res.status(500).send(err);
@@ -49,7 +49,7 @@ var agrupamentoController = function(agrupamentoModel){
 
 
 	var atualizar = function(req, res){
-		console.log(' ::: Atualizar agrupamento');
+		//console.log(' ::: Atualizar agrupamento');
 		if(req.body._id){
 			delete req.body._id;
 		}
@@ -58,7 +58,7 @@ var agrupamentoController = function(agrupamentoModel){
 			req.agrupamento[p] = req.body[p];	
 		}
 		
-		console.log(req.agrupamento);
+		//console.log(req.agrupamento);
 		req.agrupamento.save(function(err){
 			if(err){
 				res.status(500).send(err);
@@ -70,7 +70,7 @@ var agrupamentoController = function(agrupamentoModel){
 
 
 	var listar = function(req, res){
-		console.log(' ::: Listar agrupamento');
+		//console.log(' ::: Listar agrupamento');
 		
 		agrupamentoModel.find(req.query, function(err, agrupamentos){
 			if(err){

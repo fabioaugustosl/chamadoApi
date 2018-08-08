@@ -3,10 +3,10 @@ var moment = require('moment');
 var parametroController = function(parametroModel){
 
 	var salvarNovo = function(req, res){
-		console.log(' ::: Salvar Novo Parametro ');
+		//console.log(' ::: Salvar Novo Parametro ');
 		var parametro = new parametroModel(req.body);
 		
-		console.log(parametro);
+		//console.log(parametro);
 		var msgObrigatorio = '';
 		if(!req.body.dono) {
 			msgObrigatorio+= 'Dono é obrigatório.<br/>';
@@ -31,7 +31,7 @@ var parametroController = function(parametroModel){
 
 
 	var remover = function(req, res){
-		console.log(' ::: Remover parametro');
+		//console.log(' ::: Remover parametro');
 		req.parametro.remove(function(err){
 			if(err){
 				res.status(500).send(err);
@@ -45,7 +45,7 @@ var parametroController = function(parametroModel){
 
 
 	var atualizar = function(req, res){
-		console.log(' ::: Atualizar parametro');
+		//console.log(' ::: Atualizar parametro');
 		if(req.body._id){
 			delete req.body._id;
 		}
@@ -54,7 +54,7 @@ var parametroController = function(parametroModel){
 			req.parametro[p] = req.body[p];	
 		}
 		
-		console.log(req.parametro);
+		//console.log(req.parametro);
 		req.parametro.save(function(err){
 			if(err){
 				res.status(500).send(err);
@@ -66,7 +66,7 @@ var parametroController = function(parametroModel){
 
 
 	var listar = function(req, res){
-		console.log(' ::: Listar parametro');
+		//console.log(' ::: Listar parametro');
 		
 		parametroModel.find(req.query, function(err, regioes){
 			if(err){

@@ -10,7 +10,7 @@ var notificacaoController = function(notificacaoModel){
 
 	var salvarNovoSimples = function(notificacao){
 		
-		console.log(notificacao);
+		//console.log(notificacao);
 		var msgObrigatorio = '';
 		// CAMPOS OBRIGATORIOS: dono, idSolicitante, idCategoria, idUnidade
 		if(!notificacao.dono) {
@@ -97,10 +97,10 @@ var notificacaoController = function(notificacaoModel){
 
 
 	var salvarNovo = function(req, res){
-		console.log(' ::: Salvar Novo ');
+		//console.log(' ::: Salvar Novo ');
 		var notificacao = new notificacaoModel(req.body);
 		
-		console.log(notificacao);
+		//console.log(notificacao);
 		var msgObrigatorio = '';
 		// CAMPOS OBRIGATORIOS: dono, idSolicitante, idCategoria, idUnidade
 		if(!req.body.dono) {
@@ -136,13 +136,13 @@ var notificacaoController = function(notificacaoModel){
 
 	
 	var registrarLeituraNotificacao = function(idNotificacao, req, res){
-			console.log(' ::: ler notificacao ');
+		//	console.log(' ::: ler notificacao ');
 		if(!idNotificacao){
 			res.status(403).end("ID do Notificação é obrigatória para iniciar registrar a leitura.");
 		} else {	
 
 			notificacaoModel.findById(idNotificacao, function(err, notificacao){
-				console.log("mudar notificacao para lida", notificacao);
+				//console.log("mudar notificacao para lida", notificacao);
 				if(err){
 					res.status(500).send(err);
 				} else if(notificacao) {
@@ -151,11 +151,11 @@ var notificacaoController = function(notificacaoModel){
 					notificacao.lido = true;
 					
 					notificacao.save(function(err){
-						console.log('call back atualizacao chamado');
+						//console.log('call back atualizacao chamado');
 						if(err){
 							res.status(500).send(err);
 						} else {
-							console.log('vai retornar 201 - Notificação');
+							//console.log('vai retornar 201 - Notificação');
 							res.status(201).send("OK");
 						}
 					});
@@ -170,7 +170,7 @@ var notificacaoController = function(notificacaoModel){
 
 
 	var remover = function(req, res){
-		console.log(' ::: Remover notificacao');
+		//console.log(' ::: Remover notificacao');
 
 		req.notificacao.remove(function(err){
 			if(err){
@@ -185,7 +185,7 @@ var notificacaoController = function(notificacaoModel){
 
 
 	var listar = function(req, res){
-		console.log(' ::: Listar notificacao');
+		//console.log(' ::: Listar notificacao');
 		
 		notificacaoModel.find(req.query, function(err, notificacoes){
 			if(err){

@@ -11,7 +11,7 @@ var chamadoRelatorioController = function(chamadoModel, grupoModel){
 
 
 	var listarResumoCategoriasChamados = function(empresa, req, res){
-		console.log('entrou na listarResumoCategoriasChamados - id empresa : ',empresa);
+		//console.log('entrou na listarResumoCategoriasChamados - id empresa : ',empresa);
 		chamadoModel.aggregate(
 	    [	
 	    	{
@@ -28,7 +28,7 @@ var chamadoRelatorioController = function(chamadoModel, grupoModel){
 			}
 	    ],
 	    function(err,result) {
-	    	console.log(result);
+	    	//console.log(result);
 	    	res.status(201);
 			res.send(result);
 	    }
@@ -37,14 +37,14 @@ var chamadoRelatorioController = function(chamadoModel, grupoModel){
 
 
 	var listarResumoItensAtendimentosPorCategoria = function(categoria, req, res){
-		console.log('entrou na listarResumoItensAtendimentosPorCategoria - id categoria : ',categoria);
+		//console.log('entrou na listarResumoItensAtendimentosPorCategoria - id categoria : ',categoria);
 		
 		chamadoModel.find( {idCategoria: categoria} )
 		.populate("itens")
 		.limit(200)
   		.sort({ dataCriacao: -1 })
 		.exec(function(err, chamados){
-			console.log('chamados retorno itens : ',chamados);
+			//console.log('chamados retorno itens : ',chamados);
 			if(err){
 				res.status(500).send(err);
 			} else {
@@ -54,7 +54,7 @@ var chamadoRelatorioController = function(chamadoModel, grupoModel){
 					var chamadoObj = element.toJSON();
 					if(chamadoObj.itens && chamadoObj.itens.length > 0){
 						chamadoObj.itens.forEach(function(e, i, a){
-							console.log(e);
+							//console.log(e);
 							var itemObj = e ; //e.toJSON();
 							let cont = returnChamados[itemObj.nome];
 							if(!cont){
@@ -65,7 +65,7 @@ var chamadoRelatorioController = function(chamadoModel, grupoModel){
 						});
 					}
 					
-					console.log(' return chamados: ',returnChamados);
+					//console.log(' return chamados: ',returnChamados);
 				});
 
 				var retorno = [];
@@ -86,7 +86,7 @@ var chamadoRelatorioController = function(chamadoModel, grupoModel){
 
 
 	var listarResumoQtdPorSolicitante = function(empresa, req, res){
-		console.log('entrou na listarResumoQtdPorSolicitante - id empresa / dono: ',empresa);
+		//console.log('entrou na listarResumoQtdPorSolicitante - id empresa / dono: ',empresa);
 		chamadoModel.aggregate(
 		    [	
 		    	{
@@ -113,7 +113,7 @@ var chamadoRelatorioController = function(chamadoModel, grupoModel){
 
 
 	var listarResumoQtdPorAtendente = function(empresa, req, res){
-		console.log('entrou na listarResumoQtdPorAtendente - id empresa / dono: ',empresa);
+		//console.log('entrou na listarResumoQtdPorAtendente - id empresa / dono: ',empresa);
 		chamadoModel.aggregate(
 		    [	
 		    	{
@@ -141,7 +141,7 @@ var chamadoRelatorioController = function(chamadoModel, grupoModel){
 
 	
 	var listarMediaTemposChamados = function(dono, req, res){
-		console.log('entrou na listagem de media de tempos');
+		//console.log('entrou na listagem de media de tempos');
 		chamadoModel.aggregate(
 	    [	{
 	            "$match": {
@@ -157,7 +157,7 @@ var chamadoRelatorioController = function(chamadoModel, grupoModel){
 			}}
 	    ],
 	    function(err,result) {
-	    	console.log(result);
+	    	//console.log(result);
 	    	res.status(201);
 			res.send(result);
 	       // Result is an array of documents
@@ -168,7 +168,7 @@ var chamadoRelatorioController = function(chamadoModel, grupoModel){
 
 
 	var listarResumoQtdChamadosUltimos = function(dono, req, res){
-		console.log('entrou na listagem de qtd ultimos dias');
+		//console.log('entrou na listagem de qtd ultimos dias');
 		chamadoModel.aggregate(
 	    [	
 	    	{
@@ -192,7 +192,7 @@ var chamadoRelatorioController = function(chamadoModel, grupoModel){
 	        ,{ "$limit": 15 }
 	    ],
 	    function(err,result) {
-	    	console.log(result);
+	    	//console.log(result);
 	    	res.status(201);
 			res.send(result);
 	    }
@@ -201,7 +201,7 @@ var chamadoRelatorioController = function(chamadoModel, grupoModel){
 
 
 	var listarResumoMediaAvaliacoesChamados = function(dono, req, res){
-		console.log('entrou na listarResumoMediaAvaliacoesChamados');
+		//console.log('entrou na listarResumoMediaAvaliacoesChamados');
 		chamadoModel.aggregate(
 	    [	
 	    	{
@@ -216,7 +216,7 @@ var chamadoRelatorioController = function(chamadoModel, grupoModel){
 			}}
 	    ],
 	    function(err,result) {
-	    	console.log(result);
+	    	//console.log(result);
 	    	res.status(201);
 			res.send(result);
 	    }
@@ -226,7 +226,7 @@ var chamadoRelatorioController = function(chamadoModel, grupoModel){
 
 
 	var listarAtendentesOcupadosPorRegiao = function(donoParametro, req, res){
-		console.log('entrou na listagem de atendentes ocupados por regiao');
+		//console.log('entrou na listagem de atendentes ocupados por regiao');
 
 		var query = [];
 		query.push({dono : donoParametro});
@@ -236,7 +236,7 @@ var chamadoRelatorioController = function(chamadoModel, grupoModel){
 
 		var queryFinal = { $and: query };
 
-		console.log(queryFinal);
+		//console.log(queryFinal);
 
 		chamadoModel.aggregate(
 	    [	{
@@ -248,7 +248,7 @@ var chamadoRelatorioController = function(chamadoModel, grupoModel){
 			}}
 	    ],
 	    function(err,result) {
-	    	console.log(result);
+	    	//console.log(result);
 	    	res.status(201);
 			res.send(result);
 	    }
@@ -258,7 +258,7 @@ var chamadoRelatorioController = function(chamadoModel, grupoModel){
 
 
 	var listarTotaisChamadosDia = function(donoChamado, data, req, res){
-		console.log('entrou na listagem de totais compilados de chamados por dia');
+		//console.log('entrou na listagem de totais compilados de chamados por dia');
 		
 		var recuperarChamadosDoDia = function() {
 		  	var deferred = q.defer();
@@ -275,7 +275,7 @@ var chamadoRelatorioController = function(chamadoModel, grupoModel){
 			query.push({deletado : false});
 			query.push({dono : donoChamado});
 
-			console.log(query);
+			//console.log(query);
 			var queryFinal = {};
 			if(query && query.length > 0){
 				queryFinal = { $and: query };
@@ -283,7 +283,7 @@ var chamadoRelatorioController = function(chamadoModel, grupoModel){
 
 			chamadoModel.find(queryFinal)
 				.exec(function(err, chamados){
-					console.log('total chamados do dia: ',chamados.length);
+					//console.log('total chamados do dia: ',chamados.length);
 					if(!err){
 						var returnChamados = [];
 						chamados.forEach(function(element, index, array){
@@ -326,7 +326,7 @@ var chamadoRelatorioController = function(chamadoModel, grupoModel){
 			returnCompilado.push({andamento : totalEmAndamento});
 			returnCompilado.push({caminho : totalACaminho});
 			returnCompilado.push({fechados : totalFechados});
-			console.log(returnCompilado);
+			//console.log(returnCompilado);
 			
 			res.status(201);
 			res.json(returnCompilado);
@@ -338,7 +338,7 @@ var chamadoRelatorioController = function(chamadoModel, grupoModel){
 
 
 	var exportarChamado = function(req, res){
-		console.log(' ::: Exportar Chamados');
+		//console.log(' ::: Exportar Chamados');
 		
 		var queryFinal = montarQueryListar(req);
 
@@ -448,7 +448,7 @@ var chamadoRelatorioController = function(chamadoModel, grupoModel){
 			}
 		}
 
-		console.log(query);
+		//console.log(query);
 		var queryFinal = {};
 		if(query && query.length > 0){
 			queryFinal = { $and: query };

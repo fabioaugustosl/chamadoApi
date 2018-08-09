@@ -204,7 +204,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 
 					if(regiao){
 						var criarChamado = function(){
-							console.log("vou setar a regiao",regiao[0]._id);
+							//console.log("vou setar a regiao",regiao[0]._id);
 							chamado.idEmpresa = regiao[0].empresa._id
 							if(!chamado.codigo){
 								chamado.codigo = Math.floor(Math.random() * 99999999);
@@ -216,7 +216,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 
 							// Varrer todos os atendentes da região e gerar uma notificação
 							gerarNotificacoesParaAtendentes(chamado);
-							console.log('CHAMADO SALVO: ', chamado);
+							//console.log('CHAMADO SALVO: ', chamado);
 							res.status(201);
 							res.send(chamado);
 						}
@@ -598,10 +598,12 @@ var chamadoController = function(chamadoModel, grupoModel){
 								//console.log('callback notificações não lidas ');
 								if(!err && notificacoes){
 									notificacoes.forEach(function(element, index, array){
-										var notificacaoObj = element.toJSON();
+										//var notificacaoObj = element.toJSON();
+										var notificacaoObj = new NotificacaoModel(element.toJSON());
 										// salvar notificação
 										notificacaoObj.dataLeitura = moment().second(0).millisecond(0).utc().format();
 										notificacaoObj.lido = true;
+
 										notificacaoObj.save(function(err){	});
 									});
 								}

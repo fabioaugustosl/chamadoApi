@@ -9,7 +9,7 @@ var notificacaoModel = new Schema({
 	idChamado: {type:String},
 	lido: {type:Boolean},
 	dataCriacao:{ type: Date},
-	dataLeitura:{ type: Date},
+	dataLeitura:{ type: Date}
 });
 
 module.exports = mongoose.model('Notificacao', notificacaoModel);

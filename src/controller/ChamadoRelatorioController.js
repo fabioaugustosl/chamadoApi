@@ -187,7 +187,7 @@ var chamadoRelatorioController = function(chamadoModel, grupoModel){
 			}}
 			//,
 	        // Sorting pipeline
-	        ,{ "$sort": {  "_id.ano": -1 , "_id.mes": -1 , "_id.dia": 1 } }
+	        ,{ "$sort": {  "_id.ano": 1 , "_id.mes": 1 , "_id.dia": 1 } }
 	        // Optionally limit results
 	        ,{ "$limit": 15 }
 	    ],

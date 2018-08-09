@@ -333,8 +333,8 @@ var chamadoController = function(chamadoModel, grupoModel){
 				res.status(500).send(err);
 			} else {
 				console.log('vai retornar 201 - atualizacao chamado');
-				res.status(201).send();
-			}
+				res.status(201).send()
+;			}
 		});
 	};
 
@@ -372,6 +372,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 
 					//console.log('item: ',req.body.idItem);
 					chamado.itens = [req.body.idItem];	
+					chamado.comentarioEncerramento = req.body.comentarioEncerramento;
 					
 					chamado.save(function(err){
 						//console.log('call back atualizacao chamado');

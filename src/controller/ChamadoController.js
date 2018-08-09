@@ -317,7 +317,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 
 
 	var atualizar = function(req, res){
-		//console.log(' ::: Atualizar chamado ');
+		console.log(' ::: Atualizar chamado ');
 		if(req.body._id){
 			delete req.body._id;
 		}
@@ -342,7 +342,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 	// esse metodo se chamava AVALIAR.. agora se chama classificar. É usado para que o apoio classifique o
 	// chamado após finalizar
 	var classificarAtendimento = function(idChamado, req, res){
-		//console.log(' ::: classificar chamado ');
+		console.log(' ::: classificar chamado ');
 		if(req.body._id){
 			delete req.body._id;
 		}
@@ -395,7 +395,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 
 	// avaliação feita pelo solicitando após a finalização do chamado.
 	var avaliarAtendimento = function(idChamado, numeroEstrelas, req, res){
-		//console.log(' ::: avaliar chamado ');
+		console.log(' ::: avaliar chamado ');
 		if(req.body._id){
 			delete req.body._id;
 		}
@@ -427,7 +427,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 
 
 	var pegarAtendimento = function(idChamado, idAtendente, nomeAtendente, previsaoMinutos, req, res){
-		//console.log(' ::: pegar atendimento chamado ');
+		console.log(' ::: pegar atendimento chamado ');
 		if(!idChamado || !idAtendente){
 			res.status(403).end("ID do chamado e ID do atentente são obrigatórios para iniciar um atendimento.");
 		} else {
@@ -485,7 +485,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 
 
 	var iniciarAtendimento = function(idChamado, idAtende, req, res){
-		//console.log(' ::: Iniciar atendimento chamado ');
+		console.log(' ::: Iniciar atendimento chamado ');
 		if(!idChamado || !idAtende){
 			res.status(403).end("ID do chamado e ID do atentente são obrigatórios para iniciar um atendimento.");
 		} else {
@@ -568,7 +568,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 
 
 	var finalizarAtendimento = function(idChamadoFinalizar, req, res){
-		//console.log(' ::: Finalizar atendimento chamado ');
+		console.log(' ::: Finalizar atendimento chamado ');
 
 		chamadoModel.findById(idChamadoFinalizar, function(err, chamado){
 			if(err){

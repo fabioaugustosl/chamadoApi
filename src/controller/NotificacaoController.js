@@ -9,7 +9,7 @@ var notificacaoController = function(notificacaoModel){
 
 
 	var salvarNovoSimples = function(notificacao){
-		
+		console.log('salvar notificacao');
 		//console.log(notificacao);
 		var msgObrigatorio = '';
 		// CAMPOS OBRIGATORIOS: dono, idSolicitante, idCategoria, idUnidade
@@ -33,7 +33,7 @@ var notificacaoController = function(notificacaoModel){
 
 
 	var salvarPorChamado = function(idChamado, req, res){
-		//console.log('chegou no salvar por chamado >', idChamado);
+		console.log('chegou no salvar por chamado >', idChamado);
 
 		var recuperarChamado = function(idChamado) {
 			//console.log('vai recuperr o chamado ',idChamado);
@@ -97,7 +97,7 @@ var notificacaoController = function(notificacaoModel){
 
 
 	var salvarNovo = function(req, res){
-		//console.log(' ::: Salvar Novo ');
+		console.log(' ::: Salvar Novo ');
 		var notificacao = new notificacaoModel(req.body);
 		
 		//console.log(notificacao);
@@ -136,7 +136,7 @@ var notificacaoController = function(notificacaoModel){
 
 	
 	var registrarLeituraNotificacao = function(idNotificacao, req, res){
-		//	console.log(' ::: ler notificacao ');
+			console.log(' ::: ler notificacao ');
 		if(!idNotificacao){
 			res.status(403).end("ID do Notificação é obrigatória para iniciar registrar a leitura.");
 		} else {	

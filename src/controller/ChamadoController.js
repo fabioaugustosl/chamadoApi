@@ -80,7 +80,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 				query.push({dono : chamado.dono});
 				query.push({cpf :  chamado.cpfSolicitante});
 
-			   	SolicitanteAutorizadoModel.find(query)
+			   	SolicitanteAutorizadoModel.find({ $and: query })
 			   		.exec(function (err, solicitante) {
 						console.log('callback do validarSolicitanteAutorizado :', solicitante );
 						//if(!err && solicitante){

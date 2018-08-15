@@ -17,7 +17,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 		console.log(' ::: Salvar Novo ');
 		var chamado = new chamadoModel(req.body);
 		
-		console.log(chamado);
+		//console.log(chamado);
 		var msgObrigatorio = '';
 		// CAMPOS OBRIGATORIOS: dono, idSolicitante, idCategoria, idUnidade
 		if(!req.body.dono) {
@@ -33,8 +33,6 @@ var chamadoController = function(chamadoModel, grupoModel){
 			msgObrigatorio+= 'A unidade de origem do chamado é obrigatória.<br/>';
 		}
 
-		console.log('msg obrigatória : ',msgObrigatorio);
-		
 		if(msgObrigatorio != '') {
 			res.status(400);
 			res.send(msgObrigatorio);
@@ -48,7 +46,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 
 			   	chamadoModel.where({ 'dono': chamado.dono , 'idUnidade': chamado.idUnidade, 'idSolicitante': chamado.idSolicitante, 'deletado': false, 'dataFim': null})
 			   			.count(function (err, count) {
-					console.log('callback do count recuperarChamadoAbertoParaEsseSolicitanteEUnidade :', count );
+					//console.log('callback do count recuperarChamadoAbertoParaEsseSolicitanteEUnidade :', count );
 					if(!err){
 				  		deferred.resolve(count);
 					}
@@ -159,11 +157,11 @@ var chamadoController = function(chamadoModel, grupoModel){
 			var recuperarRegiaoDaUnidade = function() {
 			  	var deferred = q.defer();
 
-			  	console.log('Vai pesquisar pela unidade : ', chamado.idUnidade)
+			  	//console.log('Vai pesquisar pela unidade : ', chamado.idUnidade)
 			   	grupoModel.find({ unidades : { $all : [chamado.idUnidade] }})
 			   	.populate('empresa')
 			   	.exec(function(err, regiao){
-			   		console.log('chegou no log do promise de recuperar a regiao da unidade: ', regiao);
+			   		//console.log('chegou no log do promise de recuperar a regiao da unidade: ', regiao);
 					if(err){
 						res.status(500).send(err);
 					} else {
@@ -177,7 +175,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 
 			// Após o chamado aberto eh necessário criar uma notificação para todos os apoios daquela região
 			var gerarNotificacoesParaAtendentes = function(chamado){
-				console.log('gerarNotificacoesParaAtendentes');
+				//console.log('gerarNotificacoesParaAtendentes');
 
 				RegiaoModel.findById(chamado.idRegiao)
 					.populate('apoios')
@@ -203,12 +201,12 @@ var chamadoController = function(chamadoModel, grupoModel){
 
 			// Após as validações de usuario solicitante esse método eh chamado
 			var validarRegiaoEAbrirChamado = function(){
-				console.log('validarRegiaoEAbrirChamado');
+				//console.log('validarRegiaoEAbrirChamado');
 				recuperarRegiaoDaUnidade().then(function(regiao){
 
 					if(regiao){
 						var criarChamado = function(){
-							console.log("criarChamado ===> vou setar a regiao",regiao[0]._id);
+							//console.log("criarChamado ===> vou setar a regiao",regiao[0]._id);
 							chamado.idEmpresa = regiao[0].empresa._id
 							if(!chamado.codigo){
 								chamado.codigo = Math.floor(Math.random() * 99999999);
@@ -220,7 +218,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 
 							// Varrer todos os atendentes da região e gerar uma notificação
 							gerarNotificacoesParaAtendentes(chamado);
-							console.log('CHAMADO SALVO: ', chamado);
+							//console.log('CHAMADO SALVO: ', chamado);
 							res.status(201);
 							res.send(chamado);
 						}
@@ -231,19 +229,21 @@ var chamadoController = function(chamadoModel, grupoModel){
 							if(regiao[0].idRegiaoBackup && totalChamadosDestaRegiao > 0 && totalChamadosDestaRegiao >= regiao[0].apoios.length){
 
 								// antes de verificar a região de backup vai mandar msg pro professor avisando q pode demorar um pouco
-								var notif = new NotificacaoModel();
-								notif.dono = chamado.dono;
-								notif.idPessoa = regiao.apoios[i]._id;
-								notif.idChamado = chamado._id;
-								notif.msg = "Olá "+chamado.nomeSolicitante+". No momento todos os atendentes estão ocupados. Vamos tentar atendê-lo(a) assim que possível.";
+								if(!chamado.cpfSolicitante){
+									var notif = new NotificacaoModel();
+									notif.dono = chamado.dono;
+									notif.idPessoa = regiao.apoios[i]._id;
+									notif.idChamado = chamado._id;
+									notif.msg = "Olá "+chamado.nomeSolicitante+". No momento todos os atendentes estão ocupados. Vamos tentar atendê-lo(a) assim que possível.";
 
-								NotificacaoController.salvarNovoSimples(notif);
+									NotificacaoController.salvarNovoSimples(notif);
+								}
 
 								//console.log("Entrou na parada para recuperar o chamado de backup ",regiao[0].idRegiaoBackup);
 								recuperarRegiaoBackupPorId(regiao[0].idRegiaoBackup).then(function(regiaoBackup){
-									console.log('regiao de backup recuperada : ', regiaoBackup);
+									//console.log('regiao de backup recuperada : ', regiaoBackup);
 									if(regiaoBackup){
-										console.log('vai gerar para a regiao de backup  ');
+										//console.log('vai gerar para a regiao de backup  ');
 										chamado.idEmpresa = regiaoBackup.empresa._id
 										if(!chamado.codigo){
 											chamado.codigo = Math.floor(Math.random() * 99999999);
@@ -268,7 +268,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 							}
 						});
 					} else {
-						console.log('entrou no else da região');
+						//console.log('entrou no else da região');
 						res.status(403);
 						res.end('Essa unidade não está cadastrada para receber atendimento. Favor contactar o apoio via telefone..');
 					}		
@@ -283,8 +283,9 @@ var chamadoController = function(chamadoModel, grupoModel){
 				console.log("INFO : VAI ABRI UM CHAMADO PARA UM SOLICITANTE AUTORIZADO");
 				
 				validarSolicitanteAutorizado().then(function(solicitante){
-					console.log('callback validarSolicitanteAutorizado ',solicitante);
+					//console.log('callback validarSolicitanteAutorizado ',solicitante);
 					if(solicitante) {
+						chamado.nomeSolicitante = solicitante.nome;
 						recuperarChamadoAbertoParaEsseSolicitanteAutorizadoEUnidade().then(function(total) {
 							if(!total || total == 0){
 								validarRegiaoEAbrirChamado();
@@ -294,7 +295,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 							}
 						});
 					} else {
-						console.log('entrou no else');
+						//console.log('entrou no else');
 						res.status(403);
 						res.end('Usuário não autorizado');
 					}

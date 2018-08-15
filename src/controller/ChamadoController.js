@@ -17,7 +17,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 		console.log(' ::: Salvar Novo ');
 		var chamado = new chamadoModel(req.body);
 		
-		//console.log(chamado);
+		console.log(chamado);
 		var msgObrigatorio = '';
 		// CAMPOS OBRIGATORIOS: dono, idSolicitante, idCategoria, idUnidade
 		if(!req.body.dono) {
@@ -32,6 +32,8 @@ var chamadoController = function(chamadoModel, grupoModel){
 		if(!req.body.idUnidade) {
 			msgObrigatorio+= 'A unidade de origem do chamado é obrigatória.<br/>';
 		}
+
+		console.log('msg obrigatória : ',msgObrigatorio);
 		
 		if(msgObrigatorio != '') {
 			res.status(400);
@@ -46,7 +48,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 
 			   	chamadoModel.where({ 'dono': chamado.dono , 'idUnidade': chamado.idUnidade, 'idSolicitante': chamado.idSolicitante, 'deletado': false, 'dataFim': null})
 			   			.count(function (err, count) {
-					//console.log('callback do count recuperarChamadoAbertoParaEsseSolicitanteEUnidade :', count );
+					console.log('callback do count recuperarChamadoAbertoParaEsseSolicitanteEUnidade :', count );
 					if(!err){
 				  		deferred.resolve(count);
 					}
@@ -61,7 +63,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 
 			   	chamadoModel.where({ 'dono': chamado.dono , 'idUnidade': chamado.idUnidade, 'cpfSolicitante': chamado.cpfSolicitante, 'deletado': false, 'dataFim': null})
 			   		.count(function (err, count) {
-						//console.log('callback do count recuperarChamadoAbertoParaEsseSolicitanteAutorizadoEUnidade :', count );
+						console.log('callback do count recuperarChamadoAbertoParaEsseSolicitanteAutorizadoEUnidade :', count );
 						if(!err){
 					  		deferred.resolve(count);
 						}
@@ -80,10 +82,10 @@ var chamadoController = function(chamadoModel, grupoModel){
 
 			   	SolicitanteAutorizadoModel.find(query)
 			   		.exec(function (err, solicitante) {
-						//console.log('callback do validarSolicitanteAutorizado :', solicitante );
-						if(!err && solicitante){
+						console.log('callback do validarSolicitanteAutorizado :', solicitante );
+						//if(!err && solicitante){
 					  		deferred.resolve(solicitante);
-						} 
+						//} 
 					});
 
 			  	return deferred.promise;
@@ -157,11 +159,11 @@ var chamadoController = function(chamadoModel, grupoModel){
 			var recuperarRegiaoDaUnidade = function() {
 			  	var deferred = q.defer();
 
-			  	//console.log('Vai pesquisar pela unidade : ', chamado.idUnidade)
+			  	console.log('Vai pesquisar pela unidade : ', chamado.idUnidade)
 			   	grupoModel.find({ unidades : { $all : [chamado.idUnidade] }})
 			   	.populate('empresa')
 			   	.exec(function(err, regiao){
-			   		//console.log('chegou no log do promise de recuperar a regiao da unidade: ', regiao);
+			   		console.log('chegou no log do promise de recuperar a regiao da unidade: ', regiao);
 					if(err){
 						res.status(500).send(err);
 					} else {
@@ -175,6 +177,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 
 			// Após o chamado aberto eh necessário criar uma notificação para todos os apoios daquela região
 			var gerarNotificacoesParaAtendentes = function(chamado){
+				console.log('gerarNotificacoesParaAtendentes');
 
 				RegiaoModel.findById(chamado.idRegiao)
 					.populate('apoios')
@@ -200,11 +203,12 @@ var chamadoController = function(chamadoModel, grupoModel){
 
 			// Após as validações de usuario solicitante esse método eh chamado
 			var validarRegiaoEAbrirChamado = function(){
+				console.log('validarRegiaoEAbrirChamado');
 				recuperarRegiaoDaUnidade().then(function(regiao){
 
 					if(regiao){
 						var criarChamado = function(){
-							//console.log("vou setar a regiao",regiao[0]._id);
+							console.log("criarChamado ===> vou setar a regiao",regiao[0]._id);
 							chamado.idEmpresa = regiao[0].empresa._id
 							if(!chamado.codigo){
 								chamado.codigo = Math.floor(Math.random() * 99999999);
@@ -216,7 +220,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 
 							// Varrer todos os atendentes da região e gerar uma notificação
 							gerarNotificacoesParaAtendentes(chamado);
-							//console.log('CHAMADO SALVO: ', chamado);
+							console.log('CHAMADO SALVO: ', chamado);
 							res.status(201);
 							res.send(chamado);
 						}
@@ -264,6 +268,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 							}
 						});
 					} else {
+						console.log('entrou no else da região');
 						res.status(403);
 						res.end('Essa unidade não está cadastrada para receber atendimento. Favor contactar o apoio via telefone..');
 					}		
@@ -275,16 +280,13 @@ var chamadoController = function(chamadoModel, grupoModel){
 			// INICIAR o processo de validação e abertura do chamado
 			if(chamado.cpfSolicitante){
 				// SE FOR UM CHAMADO DE UM ALGUEM AUTORIZADO
-				//console.log("INFO : VAI ABRI UM CHAMADO PARA UM SOLICITANTE AUTORIZADO");
+				console.log("INFO : VAI ABRI UM CHAMADO PARA UM SOLICITANTE AUTORIZADO");
 				
 				validarSolicitanteAutorizado().then(function(solicitante){
+					console.log('callback validarSolicitanteAutorizado ',solicitante);
 					if(solicitante) {
 						recuperarChamadoAbertoParaEsseSolicitanteAutorizadoEUnidade().then(function(total) {
 							if(!total || total == 0){
-								//recuperarUnidadeDoChamado().then(function(unidade){
-								//	chamado.
-								// });
-								
 								validarRegiaoEAbrirChamado();
 							} else {
 								res.status(403);
@@ -292,6 +294,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 							}
 						});
 					} else {
+						console.log('entrou no else');
 						res.status(403);
 						res.end('Usuário não autorizado');
 					}
@@ -300,7 +303,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 			} else { 
 				
 				// SE FOR UM CHAMADO DE UM PROFESSOR CADASTRADO
-				//console.log("INFO : VAI ABRI UM CHAMADO PARA UM PROFESSOR LOGADO");
+				console.log("INFO : VAI ABRI UM CHAMADO PARA UM PROFESSOR LOGADO");
 				recuperarChamadoAbertoParaEsseSolicitanteEUnidade().then(function(total) {
 					if(!total || total == 0){
 						validarRegiaoEAbrirChamado();

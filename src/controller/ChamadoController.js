@@ -38,8 +38,10 @@ var chamadoController = function(chamadoModel, grupoModel){
 			res.send(msgObrigatorio);
 		} else {
 			chamado.dataCriacao = moment().second(0).millisecond(0).utc().format();
-
-
+			if(chamado.cpfSolicitante && !chamado.nomeSolicitante){
+				chamado.nomeSolicitante = chamado.cpfSolicitante;	
+			}
+			
 			// REGRA VALIDACAO 1: não é permitido um solicitante abrir um novo chamado para a mesma unidade, desde que esse chamado ainda esteja aberto. 
 			var recuperarChamadoAbertoParaEsseSolicitanteEUnidade = function() {
 			  	var deferred = q.defer();
@@ -218,7 +220,7 @@ var chamadoController = function(chamadoModel, grupoModel){
 
 							// Varrer todos os atendentes da região e gerar uma notificação
 							gerarNotificacoesParaAtendentes(chamado);
-							//console.log('CHAMADO SALVO: ', chamado);
+							console.log('CHAMADO SALVO: ', chamado);
 							res.status(201);
 							res.send(chamado);
 						}
@@ -283,9 +285,13 @@ var chamadoController = function(chamadoModel, grupoModel){
 				console.log("INFO : VAI ABRI UM CHAMADO PARA UM SOLICITANTE AUTORIZADO");
 				
 				validarSolicitanteAutorizado().then(function(solicitante){
-					//console.log('callback validarSolicitanteAutorizado ',solicitante);
+					console.log('callback validarSolicitanteAutorizado ',solicitante);
 					if(solicitante) {
-						chamado.nomeSolicitante = solicitante.nome;
+						console.log('CHamado tem nome? ',chamado.nomeSolicitante);
+						if(!chamado.nomeSolicitante){
+							chamado.nomeSolicitante = solicitante.nome;
+						}
+						
 						recuperarChamadoAbertoParaEsseSolicitanteAutorizadoEUnidade().then(function(total) {
 							if(!total || total == 0){
 								validarRegiaoEAbrirChamado();
